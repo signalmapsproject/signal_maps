@@ -1,0 +1,995 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Signal Ledger · Signal Maps</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  :root {
+    --bg: #050810;
+    --bg-soft: #0b1220;
+    --panel: rgba(255,255,255,0.03);
+    --panel-strong: rgba(255,255,255,0.05);
+    --accent: #4fc3f7;
+    --accent-2: #8be9fd;
+    --warn: #ff6b6b;
+    --amber: #f0a500;
+    --green: #66bb6a;
+    --purple: #b39ddb;
+    --text: #c8d8e8;
+    --muted: #7e97aa;
+    --dim: #355064;
+    --border: rgba(255,255,255,0.08);
+    --max: 1240px;
+    --radius: 22px;
+    --shadow: 0 18px 46px rgba(0,0,0,0.22);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    min-height: 100vh;
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    line-height: 1.72;
+    background:
+      radial-gradient(circle at top, rgba(79,195,247,0.08), transparent 34%),
+      radial-gradient(circle at 82% 16%, rgba(179,157,219,0.09), transparent 24%),
+      var(--bg);
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.22) 0%, transparent 100%),
+      radial-gradient(1px 1px at 28% 62%, rgba(255,255,255,0.16) 0%, transparent 100%),
+      radial-gradient(1px 1px at 54% 10%, rgba(255,255,255,0.15) 0%, transparent 100%),
+      radial-gradient(1px 1px at 73% 78%, rgba(255,255,255,0.18) 0%, transparent 100%),
+      radial-gradient(1px 1px at 88% 32%, rgba(255,255,255,0.12) 0%, transparent 100%);
+  }
+
+  a { color: inherit; }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+    width: auto;
+    height: auto;
+    padding: 0.7rem 0.9rem;
+    background: var(--bg-soft);
+    color: var(--accent-2);
+    border: 1px solid var(--accent);
+    z-index: 1000;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    text-decoration: none;
+  }
+
+  .site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    background: rgba(5,8,16,0.94);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-inner,
+  .hero-inner,
+  .section-inner,
+  .footer-inner {
+    width: min(calc(100% - 32px), var(--max));
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .nav-inner {
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 10px 0;
+  }
+
+  .brand,
+  .nav-links a,
+  .nav-links span,
+  .eyebrow,
+  .section-kicker,
+  .mini,
+  .chip,
+  .table-wrap thead th,
+  .sort-btn,
+  .filter-label,
+  .stat-label,
+  .watchlist-label,
+  .meta-note {
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  .brand {
+    text-decoration: none;
+    font-size: 0.68rem;
+    color: var(--accent);
+  }
+
+  .brand:hover,
+  .brand:focus {
+    color: var(--accent-2);
+  }
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    align-items: center;
+  }
+
+  .nav-links a,
+  .nav-links span {
+    font-size: 0.62rem;
+    text-decoration: none;
+    color: var(--muted);
+  }
+
+  .nav-links a:hover,
+  .nav-links a:focus,
+  .nav-links .current {
+    color: var(--accent);
+  }
+
+  .hero {
+    position: relative;
+    padding: 48px 0 28px;
+    overflow: clip;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 160px;
+    background: linear-gradient(180deg, rgba(5,8,16,0), rgba(5,8,16,0.72));
+    pointer-events: none;
+  }
+
+  .hero-inner {
+    display: grid;
+    grid-template-columns: minmax(0, 1.8fr) minmax(300px, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .eyebrow,
+  .section-kicker,
+  .mini,
+  .stat-label,
+  .watchlist-label,
+  .meta-note {
+    font-size: 0.58rem;
+  }
+
+  .eyebrow {
+    color: var(--accent);
+    margin: 0 0 14px;
+    letter-spacing: 0.22em;
+  }
+
+  .meta-note {
+    color: var(--dim);
+    margin-top: 1rem;
+    letter-spacing: 0.08em;
+  }
+
+  h1, h2, h3 { margin: 0; font-weight: 300; }
+
+  h1 {
+    margin-bottom: 14px;
+    font-size: clamp(2.35rem, 5vw, 4.15rem);
+    line-height: 1.03;
+    color: #eef7fb;
+  }
+
+  h2 {
+    font-size: 1.18rem;
+    color: #eef7fb;
+    font-weight: 600;
+  }
+
+  h3 {
+    font-size: 1.05rem;
+    color: #eef7fb;
+    font-weight: 600;
+  }
+
+  .hero-copy p,
+  .hero-panel p,
+  .card p,
+  .note li,
+  .table-wrap td,
+  footer p,
+  .helper-text,
+  .stats p,
+  .watchlist-item p,
+  .section-head p {
+    font-size: 1rem;
+  }
+
+  .hero-copy p {
+    margin: 0 0 12px;
+    max-width: 780px;
+    color: var(--muted);
+  }
+
+  .hero-panel,
+  .card,
+  .note,
+  .table-shell,
+  .stats,
+  .watchlist-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  .hero-panel {
+    padding: 20px 20px 18px;
+    border-top-left-radius: 36px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+  }
+
+  .hero-panel p,
+  .card p,
+  .stats p {
+    margin: 0;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .btn,
+  .btn-secondary,
+  .sort-btn,
+  select {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 11px 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+    color: var(--text);
+    transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  }
+
+  .btn {
+    background: var(--accent);
+    color: #04111d;
+    border-color: transparent;
+    font-weight: 700;
+  }
+
+  .btn:hover,
+  .btn-secondary:hover,
+  .sort-btn:hover,
+  select:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary:hover,
+  .btn-secondary:focus,
+  .sort-btn:hover,
+  .sort-btn.active,
+  select:hover {
+    border-color: rgba(79,195,247,0.35);
+    color: var(--accent);
+  }
+
+  .section {
+    padding: 14px 0 10px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section + .section { padding-top: 18px; }
+
+  .section-kicker {
+    color: var(--accent);
+    margin-bottom: 12px;
+    letter-spacing: 0.18em;
+  }
+
+  .section-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: end;
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-head p {
+    margin: 0;
+    max-width: 62ch;
+    color: var(--muted);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .stats { padding: 18px 18px 16px; }
+
+  .stat-value {
+    font-size: 1.55rem;
+    line-height: 1.1;
+    color: #eef7fb;
+    margin-bottom: 8px;
+  }
+
+  .helper-text { color: var(--muted); }
+
+  .card-grid {
+    display: grid;
+    grid-template-columns: 1.15fr .85fr;
+    gap: 18px;
+  }
+
+  .card,
+  .note { padding: 20px; }
+
+  .card ul,
+  .note ul {
+    margin: 0;
+    padding-left: 20px;
+  }
+
+  .card li,
+  .note li {
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .watchlist-strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0,1fr));
+    gap: 14px;
+    margin-top: 14px;
+  }
+
+  .watchlist-item {
+    padding: 16px;
+    border-left: 3px solid var(--dim);
+  }
+
+  .watchlist-item:nth-child(1) { border-left-color: var(--purple); }
+  .watchlist-item:nth-child(2) { border-left-color: var(--amber); }
+  .watchlist-item:nth-child(3) { border-left-color: var(--accent); }
+
+  .watchlist-label {
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .watchlist-item h3 { margin-bottom: 8px; }
+
+  .watchlist-item p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.55;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .legend-item,
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 0.62rem;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+  }
+
+  .dot-blue { background: var(--accent); }
+  .dot-green { background: var(--green); }
+  .dot-amber { background: var(--amber); }
+  .dot-red { background: var(--warn); }
+  .dot-purple { background: var(--purple); }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .filter-label {
+    color: var(--muted);
+    font-size: 0.58rem;
+  }
+
+  select {
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .table-shell {
+    overflow: hidden;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    min-width: 1440px;
+    border-collapse: collapse;
+  }
+
+  .table-wrap thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(11, 18, 32, 0.96);
+    color: var(--accent);
+    font-size: 0.58rem;
+    text-align: left;
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: bottom;
+  }
+
+  .table-wrap tbody tr {
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .table-wrap tbody tr:hover {
+    background: rgba(255,255,255,0.02);
+  }
+
+  .table-wrap td {
+    padding: 14px 12px;
+    vertical-align: top;
+    color: var(--text);
+    line-height: 1.55;
+  }
+
+  .mini {
+    color: var(--muted);
+    display: block;
+    margin-top: 4px;
+  }
+
+  .case-link {
+    color: #eef7fb;
+    text-decoration: none;
+    border-bottom: 1px dotted rgba(79,195,247,0.35);
+  }
+
+  .case-link:hover,
+  .case-link:focus {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+
+  .chip.high { border-color: rgba(102,187,106,0.25); color: #dff3e1; }
+  .chip.medium { border-color: rgba(240,165,0,0.25); color: #fff0d2; }
+  .chip.verified { border-color: rgba(102,187,106,0.25); }
+  .chip.proxy { border-color: rgba(79,195,247,0.25); }
+  .chip.disputed { border-color: rgba(240,165,0,0.25); }
+  .chip.inference { border-color: rgba(179,157,219,0.25); }
+  .chip.narrative { border-color: rgba(255,107,107,0.25); }
+  .chip.open { border-color: rgba(179,157,219,0.25); }
+  .chip.resolved { border-color: rgba(102,187,106,0.25); }
+  .chip.contested { border-color: rgba(240,165,0,0.25); }
+
+  footer {
+    padding: 30px 0 46px;
+    color: var(--muted);
+    position: relative;
+    z-index: 1;
+  }
+
+  .footer-inner {
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+  }
+
+  footer p { margin: 0; }
+
+  @media (max-width: 1080px) {
+    .hero-inner,
+    .card-grid,
+    .stats-grid,
+    .watchlist-strip {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 720px) {
+    .nav-inner {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .nav-links { gap: 8px 12px; }
+
+    h1 { font-size: clamp(2.2rem, 12vw, 3.2rem); }
+  }
+</style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <nav class="site-nav" aria-label="Primary">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">Signal Maps</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="cases.html">Cases</a>
+        <a href="timeline.html">Timeline</a>
+        <a href="workflow-relay.html">Workflow</a>
+        <a href="exoplanet-method.html">Method</a>
+        <a href="ai_scorecard.html">AI Comparison</a>
+        <span class="current">Signal Ledger</span>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <div class="eyebrow">Signal Maps · Ledger · March 2026</div>
+        <h1>Signal Ledger.<br>Chronology with uncertainty attached.</h1>
+        <p>This page is the project’s working ledger: a timeline-first index of visible events, delayed signals, proxy indicators, disputed claims, and unresolved questions. It is built to show not only what happened, but when it became visible, how the signal moved, and what remains unsettled.</p>
+        <p>Each row distinguishes between <strong>event time</strong> and <strong>signal time</strong>, because delay, routing, and asymmetry are part of the evidence structure rather than background noise. The result is a chronology that keeps facts, inferences, disputes, and narrative pressure in the same frame without treating them as equivalent.</p>
+        <div class="hero-actions">
+          <a class="btn" href="#ledger">Open ledger</a>
+          <a class="btn-secondary" href="timeline.html">View timeline page</a>
+        </div>
+        <div class="meta-note">This page functions as a public-facing ledger, not a claim that every row carries the same evidentiary weight.</div>
+      </div>
+
+      <aside class="hero-panel">
+        <h2>Why this page exists</h2>
+        <p>The Signal Ledger gives the project a structured public record. Instead of leaving open questions as isolated notes, it ties them to dates, source routing, confidence, status, and human impact so readers can see how claims change over time.</p>
+        <div class="legend" aria-label="Legend">
+          <div class="legend-item"><span class="dot dot-green"></span><span>Verified fact</span></div>
+          <div class="legend-item"><span class="dot dot-blue"></span><span>Proxy indicator</span></div>
+          <div class="legend-item"><span class="dot dot-purple"></span><span>Probable inference</span></div>
+          <div class="legend-item"><span class="dot dot-amber"></span><span>Disputed claim</span></div>
+          <div class="legend-item"><span class="dot dot-red"></span><span>Narrative / optics</span></div>
+        </div>
+      </aside>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="section">
+      <div class="section-inner">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Ledger preview</div>
+            <h2>A compact view of the live record</h2>
+            <p>The homepage surfaces only a small preview of the most important open, contested, or newly resolved entries. The fuller structured record lives here.</p>
+          </div>
+        </div>
+
+        <div class="watchlist-strip">
+          <article class="watchlist-item">
+            <div class="watchlist-label">Open</div>
+            <h3>Minab attribution timing</h3>
+            <p>The event is visible early, but stronger attribution emerges later and unevenly across source ecosystems.</p>
+          </article>
+
+          <article class="watchlist-item">
+            <div class="watchlist-label">Proxy</div>
+            <h3>Landstuhl medical strain</h3>
+            <p>The ward closure is a strong operational signal, but it does not quantify hidden casualties by itself.</p>
+          </article>
+
+          <article class="watchlist-item">
+            <div class="watchlist-label">Resolved fact / open meaning</div>
+            <h3>Dover optics and correction</h3>
+            <p>The footage error is confirmed; what it reveals about editorial judgment remains the live interpretive layer.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-inner">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Structure</div>
+            <h2>How to read the ledger</h2>
+            <p>This page works like a timeline with evidence tags. A row can log an event, a later attribution shift, a proxy leak, or a framing signal. Rows do not all carry the same evidentiary weight, and they are not meant to.</p>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stats">
+            <div class="stat-label">Primary sort</div>
+            <div class="stat-value">Date / Time</div>
+            <p class="helper-text">Newest signal first by default, with event time preserved inside each row.</p>
+          </div>
+          <div class="stats">
+            <div class="stat-label">Split timing</div>
+            <div class="stat-value">2 clocks</div>
+            <p class="helper-text">Event time and signal time stay separate so delays remain visible.</p>
+          </div>
+          <div class="stats">
+            <div class="stat-label">Method</div>
+            <div class="stat-value">Routing</div>
+            <p class="helper-text">Where a signal appeared first matters almost as much as the claim itself.</p>
+          </div>
+          <div class="stats">
+            <div class="stat-label">Status</div>
+            <div class="stat-value">Open / Contested / Resolved</div>
+            <p class="helper-text">Rows track whether a question is settled, still live, or disputed.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-inner card-grid">
+        <article class="card">
+          <div class="section-kicker">Column logic</div>
+          <h2>Core schema</h2>
+          <ul>
+            <li><strong>Event date / time</strong> logs when the underlying event allegedly happened.</li>
+            <li><strong>Signal date / time</strong> logs when the claim or evidence entered the visible record.</li>
+            <li><strong>Epistemic type</strong> distinguishes verified facts, proxy indicators, probable inferences, disputed claims, and narrative signals.</li>
+            <li><strong>Routing note</strong> records where a signal surfaced first, where it lagged, and where it stayed missing.</li>
+            <li><strong>What would resolve it</strong> keeps unresolved questions tied to observable next checks instead of vague uncertainty.</li>
+          </ul>
+        </article>
+
+        <aside class="note">
+          <div class="section-kicker">Reading note</div>
+          <h2>What this page is for</h2>
+          <ul>
+            <li>The ledger is a working public record, not a claim that every row has equal evidentiary weight.</li>
+            <li>It keeps verified facts, proxy indicators, disputed claims, and interpretive signals in one place while preserving the differences between them.</li>
+            <li>That makes it easier to track how visibility, confidence, and meaning shift over time.</li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="ledger">
+      <div class="section-inner">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Ledger</div>
+            <h2>Chronology with uncertainty attached</h2>
+            <p>These starter rows are seeded from the current site record so the page has live content immediately. The sort controls let readers flip between newest-signal-first, earliest-event-first, and case order.</p>
+          </div>
+        </div>
+
+        <div class="controls" aria-label="Table controls">
+          <span class="filter-label">Sort:</span>
+          <button class="sort-btn active" type="button" data-sort="signal-desc">Newest signal first</button>
+          <button class="sort-btn" type="button" data-sort="event-asc">Earliest event first</button>
+          <button class="sort-btn" type="button" data-sort="case-asc">Case A–Z</button>
+
+          <span class="filter-label">Status:</span>
+          <select id="statusFilter" aria-label="Filter by status">
+            <option value="all">All statuses</option>
+            <option value="open">Open</option>
+            <option value="contested">Contested</option>
+            <option value="resolved">Resolved</option>
+          </select>
+
+          <span class="filter-label">Type:</span>
+          <select id="typeFilter" aria-label="Filter by epistemic type">
+            <option value="all">All types</option>
+            <option value="Verified fact">Verified fact</option>
+            <option value="Proxy indicator">Proxy indicator</option>
+            <option value="Probable inference">Probable inference</option>
+            <option value="Disputed claim">Disputed claim</option>
+            <option value="Narrative / optics">Narrative / optics</option>
+          </select>
+        </div>
+
+        <div class="table-shell">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Event date / time</th>
+                  <th>Signal date / time</th>
+                  <th>Case</th>
+                  <th>Data point / claim</th>
+                  <th>Epistemic type</th>
+                  <th>Confidence</th>
+                  <th>Source ecosystem</th>
+                  <th>Source</th>
+                  <th>Routing note</th>
+                  <th>Temporal note</th>
+                  <th>Rival explanations</th>
+                  <th>What would resolve it</th>
+                  <th>Status</th>
+                  <th>Human impact note</th>
+                  <th>Linked page</th>
+                </tr>
+              </thead>
+              <tbody id="ledgerBody">
+                <tr data-event="2026-03-08T12:00" data-signal="2026-03-08T12:00" data-case="Minab" data-status="open" data-type="Probable inference">
+                  <td><strong>Mar 8, 2026</strong><span class="mini">Later public evidentiary convergence</span></td>
+                  <td><strong>Mar 8, 2026</strong><span class="mini">Video and reporting become harder to ignore</span></td>
+                  <td>Minab</td>
+                  <td>Attribution to U.S. ordnance becomes more publicly visible after days of uneven routing and delayed recognition.</td>
+                  <td><span class="chip inference">Probable inference</span></td>
+                  <td><span class="chip medium">Medium</span></td>
+                  <td>Iranian / regional / Western</td>
+                  <td>Video release, later reporting, case synthesis</td>
+                  <td>Signal strengthens after delay rather than at moment of event.</td>
+                  <td>Clear example of event time and attribution time diverging.</td>
+                  <td>Delayed convergence could reflect evidence maturation, not necessarily coordinated suppression.</td>
+                  <td>Stable public forensic chain and open-source corroboration package.</td>
+                  <td><span class="chip open">Open</span></td>
+                  <td>Children killed; casualty range still treated as unresolved.</td>
+                  <td><a class="case-link" href="minab-case-study.html">Minab case</a></td>
+                </tr>
+
+                <tr data-event="2026-03-07T00:00" data-signal="2026-03-08T00:00" data-case="Dover" data-status="resolved" data-type="Verified fact">
+                  <td><strong>Mar 7, 2026</strong><span class="mini">Dignified transfer at Dover</span></td>
+                  <td><strong>Mar 8, 2026</strong><span class="mini">Apology and secondary coverage sharpen the record</span></td>
+                  <td>Dover</td>
+                  <td>Fox News aired old December 2025 footage during coverage of the March 7 Dover event and later apologized.</td>
+                  <td><span class="chip verified">Verified fact</span></td>
+                  <td><span class="chip high">High</span></td>
+                  <td>U.S. media / official / broadcast</td>
+                  <td>Fox News, apology, video comparison</td>
+                  <td>The correction itself becomes part of the signal.</td>
+                  <td>Coverage sequence matters more than any one frame.</td>
+                  <td>Error vs deliberate concealment remains separate from the confirmed mis-footage.</td>
+                  <td>Nothing needed to resolve the underlying fact; intent remains a different question.</td>
+                  <td><span class="chip resolved">Resolved</span></td>
+                  <td>Ceremonial visibility coexists with thin casualty context.</td>
+                  <td><a class="case-link" href="dover-case-study.html">Dover case</a></td>
+                </tr>
+
+                <tr data-event="2026-03-07T00:00" data-signal="2026-03-07T00:00" data-case="Dover" data-status="resolved" data-type="Narrative / optics">
+                  <td><strong>Mar 7, 2026</strong><span class="mini">Same event</span></td>
+                  <td><strong>Mar 7, 2026</strong><span class="mini">Visible in ceremony footage</span></td>
+                  <td>Dover</td>
+                  <td>President Trump wore a white “USA” baseball cap during the Dover dignified transfer ceremony.</td>
+                  <td><span class="chip narrative">Narrative / optics</span></td>
+                  <td><span class="chip high">High</span></td>
+                  <td>U.S. media / video evidence</td>
+                  <td>Multiple outlets, live visuals</td>
+                  <td>Directly visible but interpreted differently across audiences.</td>
+                  <td>Optics issue is immediate; meaning is contested later.</td>
+                  <td>Whether the hat is disrespectful is a framing dispute, not a factual one.</td>
+                  <td>No factual resolution needed; only interpretive debate remains.</td>
+                  <td><span class="chip resolved">Resolved</span></td>
+                  <td>Turns solemn casualty ritual into an optics and media-framing question.</td>
+                  <td><a class="case-link" href="dover-case-study.html">Dover case</a></td>
+                </tr>
+
+                <tr data-event="2026-03-04T00:00" data-signal="2026-03-04T00:00" data-case="Landstuhl" data-status="contested" data-type="Proxy indicator">
+                  <td><strong>Mar 3–4, 2026</strong><span class="mini">Service suspension window</span></td>
+                  <td><strong>Mar 3–4, 2026</strong><span class="mini">Specialist reporting surfaces it</span></td>
+                  <td>Landstuhl</td>
+                  <td>Landstuhl Regional Medical Center suspended labor and delivery services and rerouted families to local German hospitals.</td>
+                  <td><span class="chip proxy">Proxy indicator</span></td>
+                  <td><span class="chip high">High</span></td>
+                  <td>Military press / specialist reporting</td>
+                  <td>Military Times / Stars &amp; Stripes pathway</td>
+                  <td>High-value operational signal stayed mostly inside military-information channels.</td>
+                  <td>Operational change is harder to hide than a press statement.</td>
+                  <td>Could reflect general capacity pressure rather than a single casualty spike.</td>
+                  <td>Corroborating medical-system strain signals without over-quantifying intake.</td>
+                  <td><span class="chip contested">Contested</span></td>
+                  <td>Suggests serious wartime medical strain without revealing hidden totals.</td>
+                  <td><a class="case-link" href="landstuhl-case-study.html">Landstuhl case</a></td>
+                </tr>
+
+                <tr data-event="2026-03-04T12:00" data-signal="2026-03-05T00:00" data-case="Landstuhl" data-status="open" data-type="Probable inference">
+                  <td><strong>Mar 4, 2026</strong><span class="mini">After suspension window</span></td>
+                  <td><strong>Mar 5, 2026</strong><span class="mini">Interpretive read enters project record</span></td>
+                  <td>Landstuhl</td>
+                  <td>The strongest disciplined reading is medical strain serious enough to reallocate capacity, but not a quantifiable hidden casualty total.</td>
+                  <td><span class="chip inference">Probable inference</span></td>
+                  <td><span class="chip medium">Medium</span></td>
+                  <td>Project synthesis / military reporting</td>
+                  <td>Case page interpretation</td>
+                  <td>Meaning arrives after the raw operational signal.</td>
+                  <td>Good example of proxy logic staying short of full causal certainty.</td>
+                  <td>Alternative explanations for ward closure remain possible without more hospital context.</td>
+                  <td>Additional independent strain indicators from transport, intake, or staffing.</td>
+                  <td><span class="chip open">Open</span></td>
+                  <td>Human cost is partly visible through institution strain, partly hidden in uncounted casualties.</td>
+                  <td><a class="case-link" href="landstuhl-case-study.html">Landstuhl case</a></td>
+                </tr>
+
+                <tr data-event="2026-02-28T23:00" data-signal="2026-02-28T23:00" data-case="Timeline" data-status="resolved" data-type="Verified fact">
+                  <td><strong>Feb 28, 2026</strong><span class="mini">Opening strikes and initial war chronology</span></td>
+                  <td><strong>Feb 28, 2026</strong><span class="mini">Immediate event visibility</span></td>
+                  <td>Timeline</td>
+                  <td>Opening strikes, reported explosions in Tehran, Israeli confirmation of a “preemptive” strike, Trump’s announcement of a large-scale campaign, and Iranian retaliation on U.S. bases anchor the project chronology.</td>
+                  <td><span class="chip verified">Verified fact</span></td>
+                  <td><span class="chip medium">Medium</span></td>
+                  <td>Official / media / timeline synthesis</td>
+                  <td>Timeline page composite</td>
+                  <td>Functions as chronology anchor rather than a single-source claim.</td>
+                  <td>Multiple events compressed into one timeline row.</td>
+                  <td>Individual sub-events still deserve separate source chains if expanded.</td>
+                  <td>Expand into more granular rows if the ledger grows.</td>
+                  <td><span class="chip resolved">Resolved</span></td>
+                  <td>Establishes the start frame for later civilian-harm and casualty questions.</td>
+                  <td><a class="case-link" href="timeline.html">Timeline</a></td>
+                </tr>
+
+                <tr data-event="2026-02-28T10:30" data-signal="2026-02-28T10:30" data-case="Minab" data-status="resolved" data-type="Verified fact">
+                  <td><strong>Feb 28, 2026</strong><span class="mini">School hours</span></td>
+                  <td><strong>Feb 28, 2026</strong><span class="mini">Event enters multiple source spheres unevenly</span></td>
+                  <td>Minab</td>
+                  <td>A strike destroyed the Shajareh Tayyebeh girls’ school in Minab on the opening day of the war.</td>
+                  <td><span class="chip verified">Verified fact</span></td>
+                  <td><span class="chip high">High</span></td>
+                  <td>Iranian / regional / Western</td>
+                  <td>Case page synthesis of project record</td>
+                  <td>The event itself appears early, but attribution and casualty reporting diverge quickly.</td>
+                  <td>Event time is earlier than attribution maturity by several days.</td>
+                  <td>What hit the school and why remain separate questions.</td>
+                  <td>No factual dispute on the strike itself; downstream attribution is the harder layer.</td>
+                  <td><span class="chip resolved">Resolved</span></td>
+                  <td>Children were killed; exact casualty counts remain unresolved ranges.</td>
+                  <td><a class="case-link" href="minab-case-study.html">Minab case</a></td>
+                </tr>
+
+                <tr data-event="2026-02-28T10:30" data-signal="2026-03-05T12:00" data-case="Minab" data-status="open" data-type="Disputed claim">
+                  <td><strong>Feb 28, 2026</strong><span class="mini">Same strike</span></td>
+                  <td><strong>Mar 5–8, 2026</strong><span class="mini">Attribution shifts toward U.S. ordnance case</span></td>
+                  <td>Minab</td>
+                  <td>By March 5 to March 8, the public record shifts more visibly toward a U.S.-ordnance attribution argument built on anonymous official confirmation, geolocated video, and outside weapons analysis.</td>
+                  <td><span class="chip disputed">Disputed claim</span></td>
+                  <td><span class="chip medium">Medium</span></td>
+                  <td>Iranian / Western / OSINT</td>
+                  <td>Anonymous officials, geolocated video, external analysis</td>
+                  <td>Directional movement across source systems is part of the evidence.</td>
+                  <td>Eight-day delay is analytically important but not self-proving.</td>
+                  <td>Delay could reflect evidence assembly rather than deliberate concealment.</td>
+                  <td>Transparent forensic release chain and stronger open-source corroboration.</td>
+                  <td><span class="chip open">Open</span></td>
+                  <td>Attribution strength exceeds intent strength; accountability questions remain sharper than motive claims.</td>
+                  <td><a class="case-link" href="minab-case-study.html">Minab case</a></td>
+                </tr>
+
+                <tr data-event="2026-02-28T10:30" data-signal="2026-03-09T00:00" data-case="Minab" data-status="contested" data-type="Probable inference">
+                  <td><strong>Feb 28, 2026</strong><span class="mini">Same strike</span></td>
+                  <td><strong>Mar 9, 2026</strong><span class="mini">Project synthesis frame</span></td>
+                  <td>Minab</td>
+                  <td>Attribution of the strike is stronger than attribution of intent; the record does not establish deliberate targeting of the school.</td>
+                  <td><span class="chip inference">Probable inference</span></td>
+                  <td><span class="chip medium">Medium</span></td>
+                  <td>Project synthesis / cross-source</td>
+                  <td>Minab case summary</td>
+                  <td>Good example of separating mechanism from motive.</td>
+                  <td>Later synthesis narrows what can responsibly be claimed.</td>
+                  <td>Mis-aimed strike, nearby target, or unknown targeting logic remain live alternatives.</td>
+                  <td>Direct targeting evidence, operational records, or credible official admission.</td>
+                  <td><span class="chip contested">Contested</span></td>
+                  <td>Civilian deaths are visible; intent remains structurally harder to prove.</td>
+                  <td><a class="case-link" href="minab-case-study.html">Minab case</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <p>Signal Maps · Signal Ledger · A timeline-first public record for visibility gaps, proxy indicators, disputed claims, and unresolved attribution.</p>
+    </div>
+  </footer>
+
+<script>
+(() => {
+  const body = document.getElementById('ledgerBody');
+  const rows = Array.from(body.querySelectorAll('tr'));
+  const buttons = Array.from(document.querySelectorAll('.sort-btn'));
+  const statusFilter = document.getElementById('statusFilter');
+  const typeFilter = document.getElementById('typeFilter');
+
+  function applyFilters() {
+    const status = statusFilter.value;
+    const type = typeFilter.value;
+
+    rows.forEach(row => {
+      const statusMatch = status === 'all' || row.dataset.status === status;
+      const typeMatch = type === 'all' || row.dataset.type === type;
+      row.style.display = statusMatch && typeMatch ? '' : 'none';
+    });
+  }
+
+  function sortRows(mode) {
+    const sorted = [...rows].sort((a, b) => {
+      if (mode === 'signal-desc') return new Date(b.dataset.signal) - new Date(a.dataset.signal);
+      if (mode === 'event-asc') return new Date(a.dataset.event) - new Date(b.dataset.event);
+      if (mode === 'case-asc') return a.dataset.case.localeCompare(b.dataset.case) || new Date(a.dataset.event) - new Date(b.dataset.event);
+      return 0;
+    });
+
+    sorted.forEach(row => body.appendChild(row));
+  }
+
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      buttons.forEach(other => other.classList.remove('active'));
+      btn.classList.add('active');
+      sortRows(btn.dataset.sort);
+      applyFilters();
+    });
+  });
+
+  statusFilter.addEventListener('change', applyFilters);
+  typeFilter.addEventListener('change', applyFilters);
+
+  sortRows('signal-desc');
+  applyFilters();
+})();
+</script>
+</body>
+</html>

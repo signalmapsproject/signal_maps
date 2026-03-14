@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contested Meaning — A Case Study</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  :root {
+    --bg: #050810;
+    --bg-soft: #0b1220;
+    --panel: rgba(255,255,255,0.03);
+    --panel-strong: rgba(255,255,255,0.045);
+    --accent: #4fc3f7;
+    --accent-2: #8be9fd;
+    --warn: #ff6b6b;
+    --amber: #f0a500;
+    --green: #66bb6a;
+    --purple: #b39ddb;
+    --text: #c8d8e8;
+    --muted: #7e97aa;
+    --dim: #355064;
+    --border: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.03);
+    --card-bg-strong: rgba(255,255,255,0.05);
+    --shadow: 0 18px 40px rgba(0,0,0,.25);
+    --max: 1180px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: radial-gradient(circle at top, rgba(79,195,247,0.10), transparent 34%), linear-gradient(180deg, rgba(79,195,247,0.02), transparent 26%), var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    line-height: 1.72;
+    padding: 0 0 4rem;
+  }
+
+  body::before { content:''; position:fixed; inset:0; pointer-events:none; background: radial-gradient(circle at 14% 8%, rgba(79,195,247,0.08), transparent 22%), radial-gradient(circle at 82% 0%, rgba(139,233,253,0.05), transparent 20%); opacity:.92; }
+
+  nav { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; padding:1rem max(1.5rem, calc((100vw - 1040px) / 2)); border-bottom:1px solid var(--border); position:sticky; top:0; backdrop-filter:blur(12px); background:rgba(5,8,16,0.82); z-index:10; }
+  nav a, nav span { font-family:'Space Mono', monospace; font-size:0.62rem; letter-spacing:0.14em; text-transform:uppercase; text-decoration:none; }
+  nav a { color: var(--muted); }
+  nav a:hover { color: var(--accent); }
+  nav .current { color: var(--accent); }
+
+  .hero { max-width:1040px; width:min(100% - 3rem, 1040px); margin:0 auto; padding:2.85rem 0 1.55rem; position:relative; }
+  .hero::after { content:''; position:absolute; inset:auto 0 0; height:1px; background:linear-gradient(90deg, rgba(79,195,247,0.28), transparent 72%); }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Crimson Pro', serif;
+    font-weight: 300;
+    font-size: clamp(1.6rem, 4vw, 2.6rem);
+    line-height: 1.1;
+    color: #e8f4f8;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 em { font-style: italic; color: var(--accent-2); }
+
+  .intro {
+    font-size: 1rem;
+    font-weight: 300;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    max-width: 700px;
+    line-height: 1.7;
+  }
+
+  .divider {
+    height: 1px;
+    max-width:1040px; width:min(100% - 3rem, 1040px); margin: 1.6rem auto 2rem;
+  }
+
+  .divider-purple { background: linear-gradient(to right, rgba(179,157,219,0.4), transparent); }
+  .divider-warn   { background: linear-gradient(to right, rgba(255,107,107,0.35), transparent); }
+  .divider-blue   { background: linear-gradient(to right, rgba(79,195,247,0.35), transparent); }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    max-width:1040px; width:min(100% - 3rem, 1040px); margin: 2.7rem auto 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.52rem;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .c-purple { color: var(--purple); }
+  .c-warn   { color: var(--warn); }
+  .c-amber  { color: var(--amber); }
+  .c-blue   { color: var(--accent); }
+  .c-muted  { color: var(--muted); }
+
+  /* CARDS */
+  .card { padding: 1.1rem 1.2rem; margin: 0 auto 1rem; max-width: 980px; width: min(100% - 3rem, 1040px); border-left: 3px solid var(--dim); border: 1px solid var(--border); border-left-width: 3px; background: var(--card-bg); border-radius: 18px; box-shadow: var(--shadow); }
+
+  .card-warn   { border-left-color: var(--warn); }
+  .card-amber  { border-left-color: var(--amber); }
+  .card-blue   { border-left-color: var(--accent); }
+  .card-purple { border-left-color: var(--purple); }
+  .card-green  { border-left-color: var(--green); }
+
+  .card-title {
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.12rem;
+    font-weight: 600;
+    color: #e8f4f8;
+    margin-bottom: 0.5rem;
+  }
+
+  .card p {
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .card p:last-child { margin-bottom: 0; }
+  .card p strong { color: #e8f4f8; font-weight: 400; }
+
+  .source-note {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.56rem;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* CONFIDENCE TABLE */
+  .conf-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin: 0.5rem 0 0.25rem;
+  }
+
+  .conf-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.46rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-align: left;
+    padding: 0.4rem 0.5rem 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  .conf-table td {
+    padding: 0.5rem 0.5rem 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    color: var(--text);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .conf-table tr:last-child td { border-bottom: none; }
+  .conf-table td.claim  { color: #e8f4f8; font-size: 0.85rem; }
+  .conf-table td.source { color: var(--muted); font-style: italic; font-size: 0.78rem; }
+  .conf-table td.note   { color: var(--muted); font-size: 0.76rem; }
+
+  .badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.43rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.4rem;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .badge-unverifiable { background: rgba(179,157,219,0.15); color: var(--purple); }
+  .badge-low          { background: rgba(255,107,107,0.12); color: var(--warn); }
+  .badge-medium       { background: rgba(240,165,0,0.15);   color: var(--amber); }
+  .badge-high         { background: rgba(79,195,247,0.15);  color: var(--accent); }
+
+  /* RORSCHACH SPLIT */
+  .split-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    margin-bottom: 1px;
+  }
+
+  .split-cell {
+    padding: 1rem 1.1rem;
+    background: rgba(255,255,255,0.02);
+  }
+
+  .split-cell.critics     { border-left: 2px solid var(--warn); }
+  .split-cell.defenders   { border-left: 2px solid var(--accent); }
+
+  .split-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.56rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+  }
+
+  .split-label.warn { color: var(--warn); }
+  .split-label.blue { color: var(--accent); }
+
+  .split-cell ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .split-cell ul li {
+    font-size: 0.83rem;
+    line-height: 1.65;
+    color: var(--text);
+    padding: 0.2rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+  }
+
+  .split-cell ul li:last-child { border-bottom: none; }
+  .split-cell ul li::before { content: '· '; color: var(--dim); }
+
+  /* PULL QUOTE */
+  .pull-quote {
+    margin: 1.25rem 0;
+    padding: 1.25rem 1.5rem;
+    border-left: 3px solid var(--purple);
+    background: rgba(179,157,219,0.04);
+  }
+
+  .pull-quote p {
+    font-size: 1rem;
+    font-style: italic;
+    font-weight: 300;
+    color: #e8f4f8;
+    line-height: 1.65;
+    margin-bottom: 0.4rem;
+  }
+
+  .pull-quote cite {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.56rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-style: normal;
+  }
+
+  /* DEFINITION BOX */
+  .definition {
+    margin: 1.25rem 0;
+    padding: 1.25rem 1.5rem;
+    border: 1px solid rgba(179,157,219,0.2);
+    background: rgba(179,157,219,0.03);
+  }
+
+  .definition-term {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--purple);
+    margin-bottom: 0.6rem;
+  }
+
+  .definition p {
+    font-size: 0.93rem;
+    line-height: 1.75;
+    color: var(--text);
+    font-weight: 300;
+    margin-bottom: 0.5rem;
+  }
+
+  .definition p:last-child { margin-bottom: 0; }
+  .definition strong { color: #e8f4f8; font-weight: 400; }
+
+  /* INFERENCE */
+  .inference {
+    margin-top: 2.8rem; max-width:1040px; width:min(100% - 3rem, 1040px); margin-left:auto; margin-right:auto;
+    padding: 1.5rem;
+    border: 1px solid rgba(179,157,219,0.2);
+    background: rgba(179,157,219,0.03);
+  }
+
+  .inference-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--purple);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .inference p {
+    font-size: 0.93rem;
+    line-height: 1.75;
+    color: var(--text);
+    font-weight: 300;
+    margin-bottom: 0.6rem;
+  }
+
+  .inference p:last-child { margin-bottom: 0; }
+  .inference strong { color: #e8f4f8; font-weight: 400; }
+
+  /* FOOTER */
+  .foot {
+    margin-top: 2.8rem; max-width:1040px; width:min(100% - 3rem, 1040px); margin-left:auto; margin-right:auto;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.52rem;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 520px) {
+    .split-grid { grid-template-columns: 1fr; }
+    .conf-table th:nth-child(3),
+    .conf-table td:nth-child(3) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">&larr; Home</a>
+  <a href="cases.html">Cases</a>
+  <a href="exoplanet-method.html">Method</a>
+  <span class="current">Contested Meaning</span>
+</nav>
+
+<section class="hero">
+<div class="eyebrow">Exoplanet Method · Case Study · March 8, 2026</div>
+<h1>Contested Meaning<br>is not<br><em>Misinformation.</em></h1>
+<p class="intro">On March 7, 2026, Pete Hegseth raised his arm during a speech. What happened next is a case study in how the same observable event produces irreconcilable interpretations — and why that split is itself data.</p>
+</section>
+
+<div class="divider divider-purple"></div>
+
+<!-- SECTION 1: THE OBSERVABLE -->
+<div class="section-head">
+  <span class="section-num">01</span>
+  <span class="section-title c-blue">The Observable — What the Video Shows</span>
+</div>
+
+<div class="card card-blue">
+  <div class="card-title">What is confirmed</div>
+  <p>On March 7, 2026, at the Shield of the Americas Summit at Trump National Doral Miami — a gathering of 12 conservative Latin American and Caribbean nations — Secretary of Defense Pete Hegseth gave a speech about regional security alongside President Trump.</p>
+  <p>While speaking about using an <strong>"iron fist"</strong> against threats, Hegseth raised his right arm with fingers extended. The gesture was captured on video. The video exists and is verifiable.</p>
+  <div class="source-note">Sources: Video evidence · Political Tribune · Multiple social media platforms · March 7, 2026</div>
+</div>
+
+<div class="card card-warn">
+  <div class="card-title">A note on the primary source</div>
+  <p>The event was first widely reported by Political Tribune — a small outlet with unclear editorial standards and a possible partisan angle. <strong>The video itself is the confirmation, not the outlet.</strong> This distinction matters: the gesture is verified by physical evidence, not by the credibility of the publication that clipped it. When evaluating the event, cite the video. When evaluating the framing, scrutinize the source.</p>
+  <div class="source-note">Confidence methodology note · Two-model relay · March 8, 2026</div>
+</div>
+
+<!-- SECTION 2: THE WOBBLE -->
+<div class="section-head">
+  <span class="section-num">02</span>
+  <span class="section-title c-warn">The Wobble — What Cannot Be Known</span>
+</div>
+
+<div class="card">
+  <div class="card-title">Claims — graded</div>
+  <table class="conf-table">
+    <thead>
+      <tr>
+        <th style="width:32%">Claim</th>
+        <th style="width:20%">Source</th>
+        <th style="width:30%">Notes</th>
+        <th style="width:12%">Confidence</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="claim">Gesture occurred at Shield of the Americas Summit</td>
+        <td class="source">Video evidence</td>
+        <td class="note">Physical evidence. Observable and verifiable independent of any outlet.</td>
+        <td><span class="badge badge-high">High</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Hegseth has tattoos with links to Christian nationalism</td>
+        <td class="source">Snopes (fact-check, neutral)</td>
+        <td class="note">At least two tattoos have tangential links to Christian nationalism. None are direct Nazi symbols. Pattern is real; intent remains contested.</td>
+        <td><span class="badge badge-high">High</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Interpretation of gesture splits along partisan lines</td>
+        <td class="source">Social media pattern</td>
+        <td class="note">Observable across platforms. The split itself is data about polarization.</td>
+        <td><span class="badge badge-high">High</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Gesture was a deliberate Nazi salute</td>
+        <td class="source">Partisan critics</td>
+        <td class="note">Intent cannot be read from video. Permanently unverifiable.</td>
+        <td><span class="badge badge-unverifiable">Unverifiable</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Gesture was emphatic speech movement</td>
+        <td class="source">Partisan defenders</td>
+        <td class="note">Same limitation. Intent is not visible in the video. Permanently unverifiable.</td>
+        <td><span class="badge badge-unverifiable">Unverifiable</span></td>
+      </tr>
+      <tr>
+        <td class="claim">Hegseth intended fascist symbolism</td>
+        <td class="source">Inference from pattern</td>
+        <td class="note">Pattern of symbols and rhetoric is observable. Intent behind any single gesture is not.</td>
+        <td><span class="badge badge-unverifiable">Unverifiable</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="source-note">The three high-confidence items are all observable. The three unverifiable items all require reading intent. That line is the boundary between fact and interpretation.</div>
+</div>
+
+<!-- SECTION 3: THE RORSCHACH SPLIT -->
+<div class="section-head">
+  <span class="section-num">03</span>
+  <span class="section-title c-purple">The Rorschach Split — Same Image, Two Readings</span>
+</div>
+
+<div class="split-grid">
+  <div class="split-cell critics">
+    <div class="split-label warn">What critics see</div>
+    <ul>
+      <li>Tattoos already flagged by extremism researchers</li>
+      <li>"Iron fist" rhetoric as ideological signal</li>
+      <li>Musk precedent — similar gesture, similar context</li>
+      <li>Pattern of crusader symbolism throughout career</li>
+      <li>Removal from Biden inauguration security over extremist concerns</li>
+    </ul>
+  </div>
+  <div class="split-cell defenders">
+    <div class="split-label blue">What defenders see</div>
+    <ul>
+      <li>Animated speaker making emphatic gesture</li>
+      <li>Tattoos are Christian symbols with legitimate history</li>
+      <li>No direct Nazi symbols confirmed by any fact-checker</li>
+      <li>Media pattern of bad-faith interpretation</li>
+      <li>Context of summit: anti-cartel, regional security focus</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card card-purple">
+  <div class="card-title">What the split tells us</div>
+  <p>Neither reading is fabricated. Both are built from real observations. The critics are looking at a pattern; the defenders are looking at the absence of direct proof. <strong>The fact that the same video produces opposite conclusions is not a failure of analysis — it is the finding.</strong> It tells you that trust in Hegseth has already been decided by both sides before the gesture occurred. The arm going up was an inkblot.</p>
+  <div class="source-note">DeepSeek adversarial pass framing · March 8, 2026</div>
+</div>
+
+<!-- SECTION 4: THE PRECEDENT -->
+<div class="section-head">
+  <span class="section-num">04</span>
+  <span class="section-title c-amber">The Musk Precedent — Pattern Recognition</span>
+</div>
+
+<div class="card card-amber">
+  <div class="card-title">Why the precedent matters</div>
+  <p>In January 2025, Elon Musk made a visually similar gesture at a rally celebrating Trump's inauguration. The same interpretive war followed: deliberate Nazi salute versus enthusiastic gesture. The debate was never resolved because intent cannot be verified from video.</p>
+  <p>What the Musk precedent added to the Hegseth moment: <strong>viewers now arrive at the gesture with a pre-loaded interpretive frame.</strong> Pattern recognition — whether accurate or not — accelerates the split. People aren't just seeing one arm; they're seeing a second data point in a sequence they've already started interpreting.</p>
+  <p>This is how contested meaning compounds. Each ambiguous event makes the next one less ambiguous to the people who've already decided — and more ambiguous to the people who haven't.</p>
+</div>
+
+<!-- SECTION 5: THE CONCEPT -->
+<div class="section-head">
+  <span class="section-num">05</span>
+  <span class="section-title c-purple">The Concept — Why This Distinction Matters</span>
+</div>
+
+<div class="definition">
+  <div class="definition-term">Contested Meaning vs. Misinformation</div>
+  <p><strong>Misinformation</strong> is a false claim presented as fact. It can be checked against reality. The antidote is verification.</p>
+  <p><strong>Contested meaning</strong> is a true event whose significance is genuinely disputed. The event is real. The verification is possible. The interpretation is not — because interpretation requires reading intent, assigning motive, or placing a fact inside a pattern that the viewer constructs from prior belief.</p>
+  <p>Treating contested meaning as misinformation produces two failure modes: you either dismiss a real pattern because no single event is provable, or you assert intent as fact because the pattern feels convincing. <strong>Both are errors. Both are common.</strong></p>
+  <p>The Exoplanet Method handles this by separating the observable from the interpreted, grading confidence explicitly, and treating the interpretive split itself as data — evidence about polarization, prior belief, and the state of trust — rather than evidence about the event.</p>
+</div>
+
+<div class="pull-quote">
+  <p>"You can't prove intent, but you can see the orbit."</p>
+  <cite>— DeepSeek adversarial pass · March 8, 2026</cite>
+</div>
+
+<!-- INFERENCE -->
+<div class="inference">
+  <div class="inference-label">What This Case Study Adds to the Method</div>
+  <p>The Hegseth gesture is not a story about a Nazi salute. It is a story about <strong>how meaning is made under conditions of broken trust.</strong> When an audience has already decided what they believe about a figure, ambiguous evidence becomes confirmation — in both directions simultaneously.</p>
+  <p>The gesture is the visible star. The tattoos, the rhetoric, the Musk precedent, the removal from Biden's inauguration security — these are the orbital wobble. You cannot prove the planet from the wobble alone. But the wobble is real, and its shape is data.</p>
+  <p>What the Exoplanet Method adds here that standard fact-checking doesn't: the recognition that <strong>some questions are permanently unverifiable, and that's not a failure of the analysis — it's the answer.</strong> The correct output is not "true" or "false." It is: observable event, unverifiable intent, interpretive split that tells us something true about the information environment even if it tells us nothing certain about the man.</p>
+  <p>That is a more honest and more useful conclusion than either side is offering.</p>
+</div>
+
+<div class="foot">
+  <span>Case Study · Contested Meaning · Exoplanet Method · March 8, 2026 · Two-model relay: DeepSeek + ChatGPT · See also: Exoplanet Method</span>
+</div>
+
+</body>
+</html>

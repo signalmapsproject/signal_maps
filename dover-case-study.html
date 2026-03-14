@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dover Case Study · Signal Maps</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  :root {
+    --bg: #050810;
+    --bg-soft: #0b1220;
+    --panel: rgba(255,255,255,0.03);
+    --panel-strong: rgba(255,255,255,0.045);
+    --accent: #4fc3f7;
+    --accent-2: #8be9fd;
+    --warn: #ff6b6b;
+    --amber: #f0a500;
+    --green: #66bb6a;
+    --purple: #b39ddb;
+    --text: #c8d8e8;
+    --muted: #7e97aa;
+    --dim: #355064;
+    --border: rgba(255,255,255,0.08);
+    --shadow: 0 18px 40px rgba(0,0,0,0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background:
+      radial-gradient(circle at top, rgba(79,195,247,0.08), transparent 34%),
+      linear-gradient(180deg, rgba(79,195,247,0.02), transparent 26%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    min-height: 100vh;
+    line-height: 1.72;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(circle at 14% 8%, rgba(79,195,247,0.08), transparent 22%),
+      radial-gradient(circle at 82% 0%, rgba(139,233,253,0.05), transparent 20%);
+    opacity: 0.92;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+    width: auto;
+    height: auto;
+    padding: 0.7rem 0.9rem;
+    background: var(--bg-soft);
+    color: var(--accent-2);
+    border: 1px solid var(--accent);
+    z-index: 1000;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    text-decoration: none;
+  }
+
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(5,8,16,0.94);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.9rem 1.5rem;
+    font-family: 'Space Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  nav a,
+  nav span {
+    font-size: 0.56rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .nav-home {
+    color: var(--accent);
+  }
+
+  .nav-home:hover,
+  .nav-home:focus {
+    color: var(--accent-2);
+  }
+
+  .nav-sep,
+  .nav-current {
+    color: var(--dim);
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 5;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+  }
+
+  .hero,
+  .card,
+  .table-wrap,
+  .pull,
+  .proxy-box,
+  .inference {
+    box-shadow: var(--shadow);
+  }
+
+  .hero {
+    padding: 4rem 0 2.5rem;
+    border-bottom: 1px solid rgba(79,195,247,0.10);
+    margin-bottom: 2rem;
+  }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-family: 'Crimson Pro', serif;
+    font-weight: 300;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    line-height: 1.08;
+    color: #e8f4f8;
+    margin-bottom: 1rem;
+  }
+
+  h1 em {
+    color: var(--warn);
+    font-style: italic;
+  }
+
+  .intro {
+    font-size: 1.04rem;
+    line-height: 1.72;
+    color: var(--muted);
+    max-width: 720px;
+  }
+
+  .meta-note {
+    margin-top: 1.2rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.56rem;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    margin: 2rem 0 1rem;
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.56rem;
+    color: var(--dim);
+    letter-spacing: 0.12em;
+  }
+
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.64rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .c-blue { color: var(--accent); }
+  .c-amber { color: var(--amber); }
+  .c-warn { color: var(--warn); }
+
+  .card,
+  .table-wrap,
+  .pull,
+  .proxy-box,
+  .inference {
+    border-radius: 18px;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+    padding: 1.2rem 1.3rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--dim);
+  }
+
+  .card-blue { border-left-color: var(--accent); }
+  .card-amber { border-left-color: var(--amber); }
+  .card-warn { border-left-color: var(--warn); }
+  .card-green { border-left-color: var(--green); }
+
+  .card-title {
+    font-size: 1.05rem;
+    color: #e8f4f8;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .card p {
+    font-size: 0.97rem;
+    line-height: 1.68;
+    margin-bottom: 0.5rem;
+  }
+
+  .card p:last-child { margin-bottom: 0; }
+
+  .source-note {
+    margin-top: 0.75rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid var(--border);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    background: rgba(255,255,255,0.015);
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 760px;
+  }
+
+  th,
+  td {
+    padding: 0.8rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+
+  th {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-align: left;
+  }
+
+  td {
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  .claim { color: #e8f4f8; }
+  .source-col,
+  .note-col { color: var(--muted); }
+
+  .badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.42rem;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .badge-high {
+    background: rgba(79,195,247,0.15);
+    color: var(--accent);
+  }
+
+  .badge-medium {
+    background: rgba(240,165,0,0.15);
+    color: var(--amber);
+  }
+
+  .badge-low {
+    background: rgba(255,107,107,0.12);
+    color: var(--warn);
+  }
+
+  .badge-contested,
+  .badge-unverifiable {
+    background: rgba(179,157,219,0.15);
+    color: var(--purple);
+  }
+
+  .proxy-box {
+    margin: 1rem 0;
+    padding: 1.5rem;
+    border: 1px solid rgba(240,165,0,0.2);
+    background: rgba(240,165,0,0.03);
+    position: relative;
+  }
+
+  .proxy-box::before {
+    content: 'PROXY INDICATOR';
+    position: absolute;
+    top: -0.58rem;
+    left: 1rem;
+    background: var(--bg);
+    padding: 0 0.4rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.15em;
+    color: var(--amber);
+  }
+
+  .proxy-box p {
+    font-size: 0.97rem;
+    line-height: 1.7;
+    margin-bottom: 0.5rem;
+  }
+
+  .proxy-box p:last-child { margin-bottom: 0; }
+
+  .pull {
+    margin: 1.25rem 0;
+    padding: 1.25rem 1.5rem;
+    border-left: 3px solid var(--warn);
+    background: rgba(255,107,107,0.04);
+  }
+
+  .pull p {
+    font-size: 0.98rem;
+    line-height: 1.7;
+    color: #e8f4f8;
+    font-style: italic;
+    margin-bottom: 0.4rem;
+  }
+
+  .pull p:last-child { margin-bottom: 0; }
+
+  .pull cite {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.52rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-style: normal;
+  }
+
+  .inference {
+    margin: 2rem 0 1rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(255,107,107,0.2);
+    background: rgba(255,107,107,0.03);
+    position: relative;
+  }
+
+  .inference::before {
+    content: 'CURRENT JUDGMENT';
+    position: absolute;
+    top: -0.58rem;
+    left: 1rem;
+    background: var(--bg);
+    padding: 0 0.4rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.15em;
+    color: var(--warn);
+  }
+
+  .inference p {
+    font-size: 0.97rem;
+    line-height: 1.7;
+    margin-bottom: 0.5rem;
+  }
+
+  .inference p:last-child { margin-bottom: 0; }
+
+  .foot {
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.52rem;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .foot a {
+    color: var(--dim);
+    text-decoration: none;
+  }
+
+  .foot a:hover,
+  .foot a:focus {
+    color: var(--accent);
+  }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 0 1rem 2rem; }
+    nav { padding: 0.8rem 1rem; }
+  }
+
+  @media (max-width: 560px) {
+    table { min-width: 680px; }
+  }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<nav aria-label="Breadcrumb">
+  <a href="index.html" class="nav-home">Signal Maps</a>
+  <span class="nav-sep">/</span>
+  <a href="cases.html" class="nav-home">Cases</a>
+  <span class="nav-sep">/</span>
+  <span class="nav-current">Dover Case Study</span>
+</nav>
+
+<main id="main-content" class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Case Study · Behavior Tracker · March 2026</div>
+    <h1>The Hat.<br>The Old Footage.<br><em>The Wobble.</em></h1>
+    <p class="intro">
+      On March 7, 2026, President Trump attended a dignified transfer ceremony at Dover Air Force Base wearing a white baseball cap. Fox News aired old footage. Separately, those are two observable facts. Together, they form a case study in how a sympathetic network can reveal what it considers damaging even when intent remains uncertain.
+    </p>
+    <div class="meta-note">This page treats Dover as a behavior-tracker and proxy-indicator case, not as a clean proof of motive.</div>
+  </header>
+
+  <section aria-labelledby="observable-heading">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2 id="observable-heading" class="section-title c-blue">The observable · What is confirmed</h2>
+    </div>
+
+    <div class="card card-blue">
+      <div class="card-title">The event</div>
+      <p>
+        On March 7, 2026, President Trump attended the dignified transfer ceremony at Dover Air Force Base for six service members killed in the Iran conflict. A dignified transfer is one of the most solemn rituals in U.S. military culture: flag-draped remains arriving on a transport aircraft, families present, and military protocol observed.
+      </p>
+      <div class="source-note">Project case materials · March 7, 2026</div>
+    </div>
+
+    <div class="card card-amber">
+      <div class="card-title">The attire</div>
+      <p>
+        Trump wore a white baseball cap with gold “USA” lettering during the ceremony. The cap was available for purchase on his campaign merchandise site. Critics called the choice inappropriate for a solemn military ritual; defenders argued that the visit itself demonstrated respect regardless of attire.
+      </p>
+      <div class="source-note">Project case materials · confirmed by visual reporting and commentary</div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Claims · Graded</div>
+      <div class="table-wrap" style="margin-top:0.8rem; margin-bottom:0;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:30%">Claim</th>
+              <th style="width:22%">Source</th>
+              <th style="width:32%">Notes</th>
+              <th style="width:16%">Confidence</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="claim">Trump attended the Dover dignified transfer on March 7</td>
+              <td class="source-col">Multiple reports, visual evidence</td>
+              <td class="note-col">Confirmed. No meaningful dispute on attendance.</td>
+              <td><span class="badge badge-high">High</span></td>
+            </tr>
+            <tr>
+              <td class="claim">Trump wore the white “USA” baseball cap during the ceremony</td>
+              <td class="source-col">Visual evidence, multiple reports</td>
+              <td class="note-col">Confirmed by footage and still images.</td>
+              <td><span class="badge badge-high">High</span></td>
+            </tr>
+            <tr>
+              <td class="claim">The attire was disrespectful</td>
+              <td class="source-col">Critics, military commentators, some family reactions</td>
+              <td class="note-col">Interpretive and contested. Depends on the norms the viewer applies.</td>
+              <td><span class="badge badge-contested">Contested</span></td>
+            </tr>
+            <tr>
+              <td class="claim">Fox News aired older footage during March 7 coverage</td>
+              <td class="source-col">Fox acknowledgment, subsequent reporting</td>
+              <td class="note-col">Confirmed by the network’s own correction.</td>
+              <td><span class="badge badge-high">High</span></td>
+            </tr>
+            <tr>
+              <td class="claim">The old footage was aired deliberately to hide the hat</td>
+              <td class="source-col">Critics’ inference</td>
+              <td class="note-col">Intent is not directly verifiable from the available evidence.</td>
+              <td><span class="badge badge-unverifiable">Unverifiable</span></td>
+            </tr>
+            <tr>
+              <td class="claim">Trump intended to disrespect the dead</td>
+              <td class="source-col">Critics’ inference</td>
+              <td class="note-col">Attire is factual. Motive remains an inference.</td>
+              <td><span class="badge badge-unverifiable">Unverifiable</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section aria-labelledby="proxy-heading">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2 id="proxy-heading" class="section-title c-amber">The Fox proxy indicator</h2>
+    </div>
+
+    <div class="proxy-box">
+      <p>
+        Fox News airing old footage, then apologizing for it, operates as a proxy indicator whether the substitution was deliberate or accidental.
+      </p>
+      <p>
+        A proxy indicator is a fact that reveals something consequential because disclosure became operationally necessary. In this case, the apology is the disclosure. Fox confirmed that the wrong footage ran. That confirmation gives two observable facts at once: the substitution happened, and someone inside the network judged it serious enough to correct publicly.
+      </p>
+      <p>
+        What the proxy reveals is not a proven conspiracy. It reveals that the absence of the hat from coverage was preferable to its presence. That judgment, wherever it was made, is itself data about how the image was read inside a network broadly aligned with the administration.
+      </p>
+      <p>
+        You do not need to prove intent to use this signal. The wobble is in the correction. Something in the coverage had to be explained.
+      </p>
+    </div>
+  </section>
+
+  <section aria-labelledby="signal-chain-heading">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2 id="signal-chain-heading" class="section-title c-blue">Signal chain · What the sequence supports</h2>
+    </div>
+
+    <div class="card card-blue">
+      <div class="card-title">Step 1 · A visually unusual choice at a solemn ritual</div>
+      <p>
+        Campaign-style merchandise at a dignified transfer is not neutral in context. Even before interpretation begins, it creates a visible break with the expected visual language of military mourning.
+      </p>
+    </div>
+
+    <div class="card card-amber">
+      <div class="card-title">Step 2 · Sympathetic coverage substituted older footage</div>
+      <p>
+        The network did not merely frame the image more favorably. It aired footage from a different moment. That is a stronger signal than commentary alone because it changed what viewers saw.
+      </p>
+    </div>
+
+    <div class="card card-warn">
+      <div class="card-title">Step 3 · The correction matters more than the speculation</div>
+      <p>
+        The disciplined inference is not that hidden motive has been proven. It is that the correction exposed an internal judgment: the substituted footage created enough exposure risk that the outlet had to account for it later.
+      </p>
+    </div>
+  </section>
+
+  <section aria-labelledby="pattern-heading">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2 id="pattern-heading" class="section-title c-warn">The pattern · Not an isolated incident</h2>
+    </div>
+
+    <div class="card card-warn">
+      <div class="card-title">Dover and the politics of dignified transfers</div>
+      <p>
+        Dignified transfers at Dover have been politically charged across administrations. The ritual carries specific protocol precisely because the return of war dead has repeatedly become a site of symbolic conflict in American political culture.
+      </p>
+      <p>
+        In that context, campaign-adjacent attire is not a minor styling detail. Whether it reflects deliberate signaling, indifference, habit, or poor judgment, each reading says something different about the presidency. None of those motives can be settled by imagery alone.
+      </p>
+      <div class="source-note">Historical framing within project materials</div>
+    </div>
+
+    <div class="card card-amber">
+      <div class="card-title">The merchandise dimension</div>
+      <p>
+        The cap being sold through campaign channels adds a layer that would not exist with ordinary presidential attire. It means the object worn at a solemn military ceremony was also a branded product within a political marketplace.
+      </p>
+      <p>
+        Whether that overlap was intentional, incidental, or simply characteristic of a presidency in which personal brand and office are rarely separated cannot be conclusively resolved from the record alone. But the overlap itself is observable and relevant.
+      </p>
+      <div class="source-note">Project case materials · merchandise dimension</div>
+    </div>
+
+    <div class="pull">
+      <p>“The effect is the same regardless of the cause.”</p>
+      <cite>Exoplanet Method · Signal Maps · March 2026</cite>
+    </div>
+  </section>
+
+  <section aria-labelledby="method-heading">
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <h2 id="method-heading" class="section-title c-blue">What this case adds to the method</h2>
+    </div>
+
+    <div class="card card-blue">
+      <div class="card-title">The network as proxy instrument</div>
+      <p>
+        The earlier contested-meaning case showed that ambiguity is not the same thing as misinformation. Some events genuinely produce rival interpretations, and that split is itself usable data.
+      </p>
+      <p>
+        The Dover case adds another layer: the network covering the event can become a proxy indicator. When a sympathetic outlet makes an error that happens to remove a damaging image, and then has to correct that error, the sequence tells us something about institutional assessment even if motive remains blurred.
+      </p>
+      <p>
+        The network did not need to say the hat was inappropriate. Its behavior conveyed that the image carried risk. The correction revealed the judgment more clearly than a direct editorial statement might have.
+      </p>
+      <div class="source-note">Method extension · Signal Maps case logic</div>
+    </div>
+  </section>
+
+  <section aria-labelledby="judgment-heading">
+    <div class="section-head">
+      <span class="section-num">06</span>
+      <h2 id="judgment-heading" class="section-title c-warn">Current judgment</h2>
+    </div>
+
+    <div class="inference">
+      <p>
+        Taken separately, the two core facts are explainable without proven malice: a president wore a baseball cap at a solemn ceremony, and a network aired older footage in error. Taken together, they form a stronger pattern. A visually controversial object appeared at a military ritual. A sympathetic network substituted different footage. The network later corrected itself.
+      </p>
+      <p>
+        The wobble is not the hat alone. The wobble is the correction. It suggests that the image was judged damaging enough to matter inside an outlet with strong incentives to protect the administration. That does not prove intentional concealment. It does make the network’s behavior analytically significant.
+      </p>
+      <p>
+        The right public framing is: <strong>observable image, contested meaning, confirmed correction, and a strong proxy signal in the network’s flinch.</strong>
+      </p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Case Study · Dover · Behavior Tracker</span>
+    <span><a href="index.html">Home</a> · <a href="cases.html">Cases</a> · <a href="contested-meaning-case-study.html">Contested Meaning</a></span>
+  </footer>
+</main>
+</body>
+</html>

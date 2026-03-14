@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exoplanet Method · Signal Maps</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  :root {
+    --bg: #050810;
+    --bg-soft: #0b1220;
+    --panel: rgba(255,255,255,0.03);
+    --panel-strong: rgba(255,255,255,0.045);
+    --accent: #4fc3f7;
+    --accent-2: #8be9fd;
+    --warn: #ff6b6b;
+    --amber: #f0a500;
+    --green: #66bb6a;
+    --purple: #b39ddb;
+    --text: #c8d8e8;
+    --muted: #7e97aa;
+    --dim: #355064;
+    --border: rgba(255,255,255,0.08);
+    --shadow: 0 18px 40px rgba(0,0,0,0.25);
+    --max: 1080px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background:
+      radial-gradient(circle at top, rgba(79,195,247,0.08), transparent 34%),
+      linear-gradient(180deg, rgba(79,195,247,0.02), transparent 26%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    line-height: 1.72;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+      radial-gradient(circle at 16% 10%, rgba(79,195,247,0.08), transparent 22%),
+      radial-gradient(circle at 84% 0%, rgba(139,233,253,0.045), transparent 20%);
+    opacity: 0.9;
+  }
+
+  a { color: inherit; }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+    width: auto;
+    height: auto;
+    padding: 0.7rem 0.9rem;
+    background: var(--bg-soft);
+    color: var(--accent-2);
+    border: 1px solid var(--accent);
+    z-index: 1000;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    text-decoration: none;
+  }
+
+  .site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+    background: rgba(5,8,16,0.94);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-inner,
+  .page,
+  .footer-inner {
+    width: min(var(--max), calc(100% - 32px));
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 14px 0;
+  }
+
+  .brand,
+  .nav-links a,
+  .nav-links span,
+  .eyebrow,
+  .section-num,
+  .section-title,
+  .label,
+  .meta-note,
+  .foot {
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+  }
+
+  .brand {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .brand:hover,
+  .brand:focus {
+    color: var(--accent-2);
+  }
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    justify-content: flex-end;
+  }
+
+  .nav-links a,
+  .nav-links span {
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.12em;
+  }
+
+  .nav-links a:hover,
+  .nav-links a:focus,
+  .nav-links .current {
+    color: var(--accent);
+  }
+
+  .page {
+    width: min(var(--max), calc(100% - 32px));
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    padding-bottom: 4rem;
+  }
+
+  .hero {
+    padding: 72px 0 40px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(79,195,247,0.12);
+    margin-bottom: 28px;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: auto -15% -90px -15%;
+    height: 220px;
+    background: radial-gradient(circle at center, rgba(79,195,247,0.16), transparent 65%);
+    filter: blur(18px);
+    z-index: 0;
+  }
+
+  .hero > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .eyebrow {
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    margin: 0 0 18px;
+    font-weight: 300;
+    line-height: 1.04;
+    font-size: clamp(2.7rem, 5.8vw, 5rem);
+    max-width: 10ch;
+    color: #eef7fb;
+  }
+
+  h2,
+  h3 {
+    color: #eef7fb;
+  }
+
+  .intro,
+  .hero-note,
+  .pull p,
+  .card p,
+  .card li,
+  .check,
+  .note p {
+    font-size: 1rem;
+  }
+
+  .intro {
+    max-width: 46em;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .hero-note {
+    max-width: 60em;
+    color: var(--text);
+  }
+
+  .meta-note {
+    margin-top: 1rem;
+    color: var(--dim);
+    font-size: 0.56rem;
+    letter-spacing: 0.08em;
+  }
+
+  .hero-panel,
+  .pull,
+  .card,
+  .note {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+  }
+
+  .hero-panel,
+  .pull,
+  .note {
+    padding: 1.15rem 1.2rem;
+  }
+
+  .hero-panel {
+    margin-bottom: 1.5rem;
+    border-top-left-radius: 36px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+  }
+
+  .hero-panel h2 {
+    font-size: 1.18rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero-panel p {
+    color: var(--text);
+  }
+
+  .pull {
+    margin-bottom: 1.85rem;
+    border-left: 3px solid var(--accent);
+  }
+
+  .pull p {
+    color: #eef7fb;
+    font-style: italic;
+  }
+
+  .section-head {
+    display: flex;
+    gap: 0.8rem;
+    align-items: baseline;
+    margin: 2.7rem 0 1rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.55rem;
+  }
+
+  .section-num {
+    font-size: 0.56rem;
+    letter-spacing: 0.12em;
+    color: var(--dim);
+  }
+
+  .section-title {
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+  }
+
+  .grid {
+    display: grid;
+    gap: 1rem;
+    margin: 0 0 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+
+  .card {
+    padding: 1.1rem 1.2rem;
+    border-left: 3px solid var(--dim);
+    background: rgba(255,255,255,0.03);
+  }
+
+  .card.warn { border-left-color: var(--warn); }
+  .card.amber { border-left-color: var(--amber); }
+  .card.green { border-left-color: var(--green); }
+  .card.purple { border-left-color: var(--purple); }
+
+  .card h2,
+  .card h3 {
+    font-size: 1.12rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .card ul {
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .label {
+    font-size: 0.56rem;
+    letter-spacing: 0.18em;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  .checklist {
+    margin: 0 0 2rem;
+    display: grid;
+    gap: 0.85rem;
+  }
+
+  .check {
+    display: grid;
+    grid-template-columns: 26px 1fr;
+    gap: 0.85rem;
+    padding: 1rem 1.05rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+  }
+
+  .check .mark {
+    font-family: 'Space Mono', monospace;
+    color: var(--accent);
+    font-size: 0.76rem;
+    padding-top: 0.12rem;
+  }
+
+  .check strong {
+    color: #eef7fb;
+    font-weight: 600;
+  }
+
+  .note {
+    margin-bottom: 2rem;
+    border-left: 3px solid var(--warn);
+  }
+
+  .note p {
+    color: var(--text);
+  }
+
+  .inline {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .inline:hover,
+  .inline:focus {
+    color: var(--accent-2);
+  }
+
+  .foot {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.52rem;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .foot a {
+    text-decoration: none;
+  }
+
+  .foot a:hover,
+  .foot a:focus {
+    color: var(--accent-2);
+  }
+
+  @media (max-width: 720px) {
+    .nav-inner {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .nav-links {
+      justify-content: flex-start;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 12vw, 3.8rem);
+      max-width: none;
+    }
+  }
+</style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <nav class="site-nav" aria-label="Primary">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">Signal Maps</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="cases.html">Cases</a>
+        <a href="timeline.html">Timeline</a>
+        <a href="workflow-relay.html">Workflow</a>
+        <span class="current">Method</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page" id="main">
+    <section class="hero">
+      <div class="eyebrow">Method · Working framework · Version 3</div>
+      <h1>The Exoplanet Method.</h1>
+      <p class="intro">This project studies contested information environments by treating visibility, delay, routing, silence, and proxy indicators as patterns that can be investigated. The method does not assume that every gap is suppression. It asks whether the gap comes from control, ordinary noise, source ecology, timing, or the analyst’s own search limits.</p>
+      <p class="hero-note">The public version below is the readable site framework. In practice, it connects directly to the workbook, the Signal Ledger, the case pages, and the workflow relay used to keep uncertainty visible instead of smoothing it away.</p>
+      <div class="meta-note">Governing rule: absence should initiate investigation, not terminate it.</div>
+    </section>
+
+    <div class="hero-panel">
+      <h2>Reading frame</h2>
+      <p>This method is built for structured uncertainty. It is meant to help map asymmetry in information flow, test rival explanations, grade proxy evidence, and keep the analyst honest about what is solid, what is probable, and what remains unresolved.</p>
+    </div>
+
+    <div class="pull">
+      <p>Absence is not proof. It is a lead.</p>
+    </div>
+
+    <div class="section-head" id="principles">
+      <div class="section-num">01</div>
+      <div class="section-title">Core rules</div>
+    </div>
+
+    <div class="grid">
+      <article class="card green">
+        <h2>Start with what is visible</h2>
+        <p>Before chasing gaps, map what is directly observable: who is carrying the story, which facts repeat across unrelated systems, and which evidence appears first.</p>
+      </article>
+
+      <article class="card">
+        <h2>Classify absence before interpreting it</h2>
+        <p>An absence can be structural, incidental, or observer-created. It also needs a basis: documented policy, historical pattern, comparative evidence, or analyst inference.</p>
+      </article>
+
+      <article class="card">
+        <h2>Track where the signal went</h2>
+        <p>Absence is directional, not binary. A signal missing in one sphere but visible in another is a routing clue. It is not automatically proof.</p>
+      </article>
+
+      <article class="card amber">
+        <h2>Timing and persistence matter</h2>
+        <p>Log when the event appears, when attribution appears, and whether the story is sustained or allowed to die. Coverage half-life can be as revealing as first mention.</p>
+      </article>
+
+      <article class="card warn">
+        <h2>Rival explanations are required</h2>
+        <p>Do not jump from pattern to verdict. For important inferences, test competing explanations such as suppression, incompetence, verification failure, strategic ambiguity, or narrative seeding.</p>
+      </article>
+
+      <article class="card purple">
+        <h2>The analyst is part of the dataset</h2>
+        <p>Search terms, languages, platforms, assumptions, and time pressure affect what looks absent. The method audits the analyst as well as the sources.</p>
+      </article>
+    </div>
+
+    <div class="section-head" id="workflow">
+      <div class="section-num">02</div>
+      <div class="section-title">Operational workflow</div>
+    </div>
+
+    <div class="checklist">
+      <div class="check"><div class="mark">01</div><div><strong>Pre-analysis stance.</strong> State the working hypothesis, what would disconfirm it, and any pressure or prior investment that may shape interpretation.</div></div>
+      <div class="check"><div class="mark">02</div><div><strong>Visible map.</strong> Track which outlets, formats, and claims are present before interpreting what is missing.</div></div>
+      <div class="check"><div class="mark">03</div><div><strong>Key absences.</strong> Identify what seems missing, then classify both the absence and the basis for the classification.</div></div>
+      <div class="check"><div class="mark">04</div><div><strong>Directional routing.</strong> Ask where the signal appears instead, and what kind of source ecosystem is carrying it.</div></div>
+      <div class="check"><div class="mark">05</div><div><strong>Temporal map.</strong> Log event time, first mention, first attribution, first visual evidence, and any disappearance from follow-up coverage.</div></div>
+      <div class="check"><div class="mark">06</div><div><strong>Proxy indicators.</strong> Use hospital, transport, insurance, market, or infrastructure signals carefully and grade them from suggestive to near-direct.</div></div>
+      <div class="check"><div class="mark">07</div><div><strong>Rival hypotheses.</strong> For each major inference, identify real supporting evidence for the alternatives as well as for the leading interpretation.</div></div>
+      <div class="check"><div class="mark">08</div><div><strong>Epistemic labels.</strong> Separate verified facts, probable inferences, open hypotheses, narrative claims, and disputed claims.</div></div>
+      <div class="check"><div class="mark">09</div><div><strong>Outside-view checkpoint.</strong> Ask what all major spheres may be missing because of shared assumptions or blind spots.</div></div>
+      <div class="check"><div class="mark">10</div><div><strong>Human impact note.</strong> End by asking who is counted, who is invisible, and what remains unresolved about harm to civilians.</div></div>
+    </div>
+
+    <div class="section-head">
+      <div class="section-num">03</div>
+      <div class="section-title">What this method is for</div>
+    </div>
+
+    <div class="grid">
+      <article class="card green">
+        <div class="label">Strongest use</div>
+        <h3>Structured uncertainty</h3>
+        <p>The method is strongest as a way to map asymmetry in information flow, generate better investigative questions, and keep analysis honest about what is solid and what is still open.</p>
+      </article>
+
+      <article class="card amber">
+        <div class="label">Important boundary</div>
+        <h3>Not a shortcut to proof</h3>
+        <p>The method does not convert silence into causality and does not treat every omission as intentional suppression. It is a framework for disciplined inquiry, not a machine for dramatic certainty.</p>
+      </article>
+    </div>
+
+    <div class="section-head" id="limits">
+      <div class="section-num">04</div>
+      <div class="section-title">Limits and safeguards</div>
+    </div>
+
+    <div class="grid">
+      <article class="card warn">
+        <h3>Major risks</h3>
+        <ul>
+          <li>Overreading absence.</li>
+          <li>Mistaking different bias for truer bias.</li>
+          <li>Confusing search failure with suppression.</li>
+          <li>Treating planted trails as organic signals.</li>
+          <li>Letting rival-hypothesis testing become ritual rather than restraint.</li>
+        </ul>
+      </article>
+
+      <article class="card">
+        <h3>Safeguards</h3>
+        <ul>
+          <li>Audit the search method.</li>
+          <li>Make the basis for classification explicit.</li>
+          <li>Grade the source sphere and the topic-specific reliability of the source.</li>
+          <li>Track story decay as well as first appearance.</li>
+          <li>Keep a clear boundary between fact, inference, and speculation.</li>
+        </ul>
+      </article>
+    </div>
+
+    <div class="note">
+      <p><strong>Governing rule:</strong> absence should initiate investigation, not terminate it.</p>
+    </div>
+
+    <div class="foot">
+      <span>Exoplanet Method · Signal Maps · Version 3</span>
+      <span><a href="index.html">Home</a> · <a href="cases.html">Cases</a> · <a href="workflow-relay.html">Workflow</a></span>
+    </div>
+  </main>
+</body>
+</html>

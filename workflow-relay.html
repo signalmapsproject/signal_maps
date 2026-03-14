@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workflow Relay · Signal Maps</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  :root {
+    --bg: #050810;
+    --bg-soft: #0b1220;
+    --panel: rgba(255,255,255,0.03);
+    --panel-strong: rgba(255,255,255,0.05);
+    --accent: #4fc3f7;
+    --accent-2: #8be9fd;
+    --warn: #ff6b6b;
+    --amber: #f0a500;
+    --green: #66bb6a;
+    --purple: #b39ddb;
+    --text: #c8d8e8;
+    --muted: #7e97aa;
+    --dim: #355064;
+    --border: rgba(255,255,255,0.08);
+    --shadow: 0 18px 40px rgba(0,0,0,0.25);
+    --max: 1080px;
+    --ds-color: #4ade80;
+    --cg-color: #4fc3f7;
+    --human-color: #f0a500;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    line-height: 1.68;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.38) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.24) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.18) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.26) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 30%, rgba(255,255,255,0.18) 0%, transparent 100%),
+      radial-gradient(1px 1px at 20% 90%, rgba(255,255,255,0.14) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  a { color: inherit; }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+    width: auto;
+    height: auto;
+    padding: 0.7rem 0.9rem;
+    background: var(--bg-soft);
+    color: var(--accent-2);
+    border: 1px solid var(--accent);
+    z-index: 1000;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    text-decoration: none;
+  }
+
+  .site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(5,8,16,0.94);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-inner,
+  .page,
+  .footer-inner {
+    width: min(var(--max), calc(100% - 32px));
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 14px 0;
+  }
+
+  .brand,
+  .nav-links a,
+  .nav-links span,
+  .eyebrow,
+  .section-num,
+  .section-title,
+  .step-kicker,
+  .prompt-header,
+  .copy-btn,
+  .foot,
+  .meta-note {
+    font-family: 'Space Mono', monospace;
+    text-transform: uppercase;
+  }
+
+  .brand {
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .brand:hover,
+  .brand:focus {
+    color: var(--accent-2);
+  }
+
+  .nav-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 14px;
+    justify-content: flex-end;
+  }
+
+  .nav-links a,
+  .nav-links span {
+    font-size: 0.62rem;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.12em;
+  }
+
+  .nav-links a:hover,
+  .nav-links a:focus,
+  .nav-links .current {
+    color: var(--accent);
+  }
+
+  .page {
+    padding-bottom: 4rem;
+  }
+
+  .hero {
+    padding: 72px 0 40px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(79,195,247,0.12);
+    margin-bottom: 28px;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: auto -15% -90px -15%;
+    height: 220px;
+    background: radial-gradient(circle at center, rgba(79,195,247,0.16), transparent 65%);
+    filter: blur(18px);
+    z-index: 0;
+  }
+
+  .hero > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  .eyebrow {
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  h1 {
+    margin: 0 0 18px;
+    font-weight: 300;
+    line-height: 1.02;
+    font-size: clamp(2.7rem, 5.8vw, 5rem);
+    max-width: 10ch;
+    color: #eef7fb;
+  }
+
+  h1 em {
+    color: var(--accent-2);
+    font-style: italic;
+  }
+
+  h2,
+  h3 {
+    color: #eef7fb;
+  }
+
+  .intro {
+    font-size: clamp(1.12rem, 2.2vw, 1.36rem);
+    max-width: 37em;
+    color: #d9e7f2;
+    margin: 0 0 18px;
+  }
+
+  .hero-note,
+  .copy-intro p,
+  .body-copy p,
+  .lede-card p,
+  .quote-card p,
+  .summary-card p,
+  .step-card p,
+  .info-card p,
+  .support-card p,
+  .prompt-body,
+  .hero-panel p {
+    font-size: 1rem;
+  }
+
+  .hero-note {
+    max-width: 60em;
+    color: var(--text);
+  }
+
+  .meta-note {
+    margin-top: 1rem;
+    color: var(--dim);
+    font-size: 0.56rem;
+    letter-spacing: 0.08em;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .btn,
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    border-radius: 999px;
+    text-decoration: none;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1px solid var(--border);
+    transition: transform 0.15s ease, border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  }
+
+  .btn {
+    background: var(--accent);
+    color: #04111d;
+    border-color: transparent;
+    font-weight: 700;
+  }
+
+  .btn:hover,
+  .btn-secondary:hover {
+    transform: translateY(-1px);
+  }
+
+  .btn-secondary {
+    color: var(--text);
+    background: rgba(255,255,255,0.02);
+  }
+
+  .btn-secondary:hover,
+  .btn-secondary:focus {
+    border-color: rgba(139,233,253,0.35);
+    color: var(--accent-2);
+  }
+
+  .divider {
+    height: 1px;
+    margin: 28px 0 36px;
+  }
+
+  .divider-blue { background: linear-gradient(to right, rgba(79,195,247,0.4), transparent); }
+  .divider-green { background: linear-gradient(to right, rgba(74,222,128,0.4), transparent); }
+  .divider-amber { background: linear-gradient(to right, rgba(240,165,0,0.35), transparent); }
+
+  .lede-card,
+  .quote-card,
+  .info-card,
+  .step-card,
+  .support-card,
+  .prompt-block,
+  .summary-card,
+  .hero-panel {
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+    box-shadow: var(--shadow);
+  }
+
+  .hero-panel,
+  .lede-card,
+  .quote-card,
+  .summary-card {
+    padding: 1.15rem 1.2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-panel {
+    border-top-left-radius: 36px;
+    max-width: 62em;
+  }
+
+  .hero-panel p,
+  .lede-card p,
+  .summary-card p,
+  .quote-card p {
+    margin: 0;
+    color: var(--text);
+  }
+
+  .quote-card {
+    border-left: 3px solid var(--accent);
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin: 2.75rem 0 1.15rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-size: 0.56rem;
+    color: var(--dim);
+    letter-spacing: 0.12em;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+  }
+
+  .c-blue { color: var(--cg-color); }
+  .c-green { color: var(--ds-color); }
+  .c-amber { color: var(--amber); }
+  .c-muted { color: var(--muted); }
+
+  .copy-intro,
+  .body-copy {
+    max-width: 68em;
+  }
+
+  .body-copy p,
+  .copy-intro p {
+    margin: 0 0 1rem;
+  }
+
+  .body-copy p:last-child,
+  .copy-intro p:last-child {
+    margin-bottom: 0;
+  }
+
+  .steps-grid,
+  .role-grid,
+  .support-grid,
+  .analyst-grid,
+  .archive-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 1.2rem;
+  }
+
+  .steps-grid {
+    margin-top: 1.25rem;
+  }
+
+  .step-card,
+  .info-card,
+  .support-card {
+    padding: 1rem 1rem 1rem 1.05rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .step-card.ds { border-left: 3px solid var(--ds-color); }
+  .step-card.cg { border-left: 3px solid var(--cg-color); }
+  .step-card.human { border-left: 3px solid var(--human-color); }
+  .step-card.audit { border-left: 3px solid var(--warn); }
+
+  .step-kicker {
+    display: block;
+    margin-bottom: 0.45rem;
+    font-size: 0.52rem;
+    color: var(--dim);
+    letter-spacing: 0.15em;
+  }
+
+  .step-card h3,
+  .info-card h3,
+  .support-card h3 {
+    margin: 0 0 0.55rem;
+    font-size: 1.16rem;
+    font-weight: 600;
+  }
+
+  .step-card p,
+  .info-card p,
+  .support-card p {
+    margin: 0;
+    color: var(--text);
+  }
+
+  .info-card.ds {
+    border-color: rgba(74,222,128,0.22);
+    background: linear-gradient(180deg, rgba(74,222,128,0.06), rgba(255,255,255,0.02));
+  }
+
+  .info-card.cg {
+    border-color: rgba(79,195,247,0.22);
+    background: linear-gradient(180deg, rgba(79,195,247,0.06), rgba(255,255,255,0.02));
+  }
+
+  .info-card.human {
+    border-color: rgba(240,165,0,0.22);
+    background: linear-gradient(180deg, rgba(240,165,0,0.06), rgba(255,255,255,0.02));
+  }
+
+  .info-card ul,
+  .support-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.8rem 0 0;
+  }
+
+  .info-card li,
+  .support-card li {
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+
+  .info-card li::before,
+  .support-card li::before {
+    content: '→ ';
+    color: currentColor;
+    opacity: 0.55;
+  }
+
+  .prompt-block {
+    margin-bottom: 1.25rem;
+    overflow: hidden;
+  }
+
+  .prompt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 0.7rem 0.95rem;
+    font-size: 0.56rem;
+    letter-spacing: 0.12em;
+    user-select: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .prompt-header.ds {
+    background: rgba(74,222,128,0.08);
+    color: var(--ds-color);
+    border-bottom-color: rgba(74,222,128,0.12);
+  }
+
+  .prompt-header.cg {
+    background: rgba(79,195,247,0.08);
+    color: var(--cg-color);
+    border-bottom-color: rgba(79,195,247,0.12);
+  }
+
+  .prompt-header.mix {
+    background: rgba(179,157,219,0.08);
+    color: var(--purple);
+    border-bottom-color: rgba(179,157,219,0.12);
+  }
+
+  .prompt-header.audit {
+    background: rgba(255,107,107,0.08);
+    color: var(--warn);
+    border-bottom-color: rgba(255,107,107,0.12);
+  }
+
+  .prompt-header.archive {
+    background: rgba(240,165,0,0.08);
+    color: var(--amber);
+    border-bottom-color: rgba(240,165,0,0.12);
+  }
+
+  .copy-btn {
+    font-size: 0.5rem;
+    padding: 0.32rem 0.58rem;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    opacity: 0.75;
+    transition: opacity 0.2s, transform 0.15s;
+    flex-shrink: 0;
+  }
+
+  .copy-btn:hover {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+
+  .copy-btn.copied {
+    opacity: 1;
+  }
+
+  .prompt-body {
+    padding: 1rem 1.1rem;
+    line-height: 1.78;
+    color: var(--text);
+    white-space: pre-wrap;
+    font-family: 'Crimson Pro', serif;
+  }
+
+  .prompt-body .ph {
+    color: var(--amber);
+    font-style: italic;
+  }
+
+  .foot {
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.52rem;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .foot a {
+    text-decoration: none;
+  }
+
+  .foot a:hover,
+  .foot a:focus {
+    color: var(--accent-2);
+  }
+
+  @media (max-width: 900px) {
+    .steps-grid,
+    .role-grid,
+    .support-grid,
+    .analyst-grid,
+    .archive-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .nav-inner {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .nav-links {
+      justify-content: flex-start;
+    }
+
+    .hero {
+      padding-top: 64px;
+    }
+
+    h1 {
+      max-width: none;
+    }
+  }
+</style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <nav class="site-nav" aria-label="Primary">
+    <div class="nav-inner">
+      <a class="brand" href="index.html">Signal Maps</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="cases.html">Cases</a>
+        <a href="timeline.html">Timeline</a>
+        <a href="exoplanet-method.html">Method</a>
+        <a href="ai_scorecard.html">AI Comparison</a>
+        <span class="current">Workflow</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="page" id="main">
+    <section class="hero">
+      <div class="eyebrow">Workflow · DeepSeek + ChatGPT Relay · March 2026</div>
+      <h1>Working with<br><em>productive friction.</em></h1>
+      <p class="intro">Signal Maps uses a structured relay between DeepSeek, ChatGPT, and the human analyst to widen the source field, challenge dominant framing, classify uncertainty, and carry unresolved questions forward instead of smoothing them away.</p>
+      <p class="hero-note">The workbook is the operational master version of this workflow. This page is the public-facing explanation of the same relay: intake, research, synthesis, two-way challenge, reconciliation, hallucination audit, and archive formatting into the Signal Ledger and site record.</p>
+      <div class="hero-actions">
+        <a class="btn" href="#workflow">View workflow</a>
+        <a class="btn-secondary" href="#prompts">Jump to prompt stack</a>
+      </div>
+      <div class="meta-note">This page explains the relay publicly. The workbook remains the day-to-day operating layer.</div>
+    </section>
+
+    <div class="hero-panel">
+      <h2>Reading frame</h2>
+      <p>This page turns the method into a working relay. The point is not consensus. The point is disciplined friction: different model strengths, explicit challenge passes, and a final record that keeps unresolved questions visible instead of forcing closure too early.</p>
+    </div>
+
+    <div class="quote-card">
+      <p>When the models converge, that matters. When they diverge, that matters too. Divergence can reveal source asymmetry, framing differences, hidden assumptions, or overconfidence. In this workflow, disagreement is part of the evidence structure.</p>
+    </div>
+
+    <div class="divider divider-blue"></div>
+
+    <div class="section-head" id="purpose">
+      <span class="section-num">01</span>
+      <span class="section-title c-muted">What the relay is for</span>
+    </div>
+
+    <div class="copy-intro">
+      <p>Modern conflict reporting is shaped by access restrictions, state routing, platform bias, language asymmetry, and model-specific blind spots. A single model can summarize what is visible. A relay is better at mapping what is visible, what is absent, where the missing signal appears instead, and what remains structurally unknowable.</p>
+      <p>This workflow exists to widen the source environment, separate claims from facts, test absence without turning silence into proof, force each model to challenge the other, and carry unresolved uncertainty forward instead of forcing closure.</p>
+      <p>This is the operational side of the Exoplanet Method. Information gaps matter, but only after the gap is classified, routed, timed, and tested against rival explanations. The method is strongest as disciplined uncertainty, not dramatic certainty.</p>
+    </div>
+
+    <div class="divider divider-green"></div>
+
+    <div class="section-head" id="workflow">
+      <span class="section-num">02</span>
+      <span class="section-title c-green">The 8-step workflow</span>
+    </div>
+
+    <div class="steps-grid">
+      <div class="step-card human">
+        <span class="step-kicker">Step 01 · Analyst</span>
+        <h3>Intake / Scoping</h3>
+        <p>The analyst defines the case, time window, geographic scope, key claims, baseline source types, known constraints, and what would count as strong evidence for or against the leading interpretation. This keeps the models from answering different questions.</p>
+      </div>
+
+      <div class="step-card ds">
+        <span class="step-kicker">Step 02 · DeepSeek</span>
+        <h3>Research Pass</h3>
+        <p>DeepSeek widens the source field, maps visible source ecosystems, identifies thin or missing environments, builds a claims ledger, and surfaces proxy indicators, rival hypotheses, routing patterns, and human-impact gaps.</p>
+      </div>
+
+      <div class="step-card cg">
+        <span class="step-kicker">Step 03 · ChatGPT</span>
+        <h3>Synthesis Pass</h3>
+        <p>ChatGPT applies the Exoplanet Method to classify what is verified, inferred, disputed, narrative, and unresolved. The goal is not polish first. The goal is structure, category discipline, and uncertainty discipline.</p>
+      </div>
+
+      <div class="step-card ds">
+        <span class="step-kicker">Step 04 · DeepSeek</span>
+        <h3>Challenge Pass</h3>
+        <p>DeepSeek stress-tests the ChatGPT synthesis, flags hidden framing assumptions, challenges overreach, and adds rival readings that may be underweighted in English-dominant or Western-centered summaries.</p>
+      </div>
+
+      <div class="step-card cg">
+        <span class="step-kicker">Step 05 · ChatGPT</span>
+        <h3>Challenge Pass</h3>
+        <p>ChatGPT audits the DeepSeek memo for confidence inflation, bundled claims, overread silence, weak proxy logic, missing rival hypotheses, and places where source breadth is more apparent than real.</p>
+      </div>
+
+      <div class="step-card human">
+        <span class="step-kicker">Step 06 · Shared Hinge</span>
+        <h3>Reconciliation / Persistent Wobble</h3>
+        <p>The record is reconciled without forcing false closure. Agreed findings, evidentiary divergences, framing divergences, and unresolved questions are separated cleanly, and persistent wobble is carried forward on purpose.</p>
+      </div>
+
+      <div class="step-card audit">
+        <span class="step-kicker">Step 07 · Final Audit</span>
+        <h3>Hallucination / Overreach Audit</h3>
+        <p>A final audit checks whether any name, date, number, quote, causal link, or narrative arc sounds more certain than the evidence justifies. This step protects epistemic honesty, not aesthetics.</p>
+      </div>
+
+      <div class="step-card human">
+        <span class="step-kicker">Step 08 · Archive</span>
+        <h3>Archive Formatter</h3>
+        <p>The reconciled record is converted into the project’s structured outputs: Signal Ledger entries, case-page updates, timeline notes, and archive-ready summaries that preserve uncertainty instead of flattening it.</p>
+      </div>
+    </div>
+
+    <div class="divider divider-blue"></div>
+
+    <div class="section-head" id="roles">
+      <span class="section-num">03</span>
+      <span class="section-title c-blue">What each side does best</span>
+    </div>
+
+    <div class="role-grid">
+      <div class="info-card ds">
+        <h3>DeepSeek</h3>
+        <p>DeepSeek is most useful when the work depends on widening the source ecology and resisting default routing.</p>
+        <ul>
+          <li>source expansion beyond the default English web</li>
+          <li>pressure from Chinese, Russian, Iranian, Gulf, and non-Western information environments</li>
+          <li>research memos rather than polished narrative closure</li>
+          <li>adversarial stress-testing of synthesis drafts</li>
+          <li>proxy hunting across economic, logistical, media, and access signals</li>
+        </ul>
+      </div>
+
+      <div class="info-card cg">
+        <h3>ChatGPT</h3>
+        <p>ChatGPT is most useful when the task requires structure, classification, reconciliation, and disciplined uncertainty.</p>
+        <ul>
+          <li>separating verified facts from claims, inferences, and open hypotheses</li>
+          <li>applying the Exoplanet Method across the whole working record</li>
+          <li>distinguishing evidentiary divergence from framing divergence</li>
+          <li>preserving uncertainty without turning the draft into mush</li>
+          <li>turning the record into stable ledger, case, timeline, and archive-ready formats</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="divider divider-amber"></div>
+
+    <div class="section-head" id="analyst">
+      <span class="section-num">04</span>
+      <span class="section-title c-amber">Where the human analyst intervenes</span>
+    </div>
+
+    <div class="analyst-grid">
+      <div class="info-card human">
+        <h3>Before the relay</h3>
+        <ul>
+          <li>define the question tightly enough that disagreement is about evidence, not task drift</li>
+          <li>set the evidentiary threshold for the case at hand</li>
+          <li>name likely source constraints, framing traps, and your own priors</li>
+          <li>decide what baseline sources count as authoritative for this specific problem</li>
+        </ul>
+      </div>
+
+      <div class="info-card human">
+        <h3>During and after the relay</h3>
+        <ul>
+          <li>judge whether a disagreement is substantive or merely stylistic</li>
+          <li>choose which unresolved claims stay in wobble and which move into the main record</li>
+          <li>decide when more searching is necessary and when uncertainty is the honest endpoint</li>
+          <li>own the final call about what gets logged, published, or held back</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="summary-card">
+      <p><strong>The analyst is not a passive recipient of model output.</strong> The analyst is the hinge: setting scope, judging source quality, deciding what survives challenge, and carrying forward the questions that should remain open.</p>
+    </div>
+
+    <div class="divider divider-green"></div>
+
+    <div class="section-head" id="prompts">
+      <span class="section-num">05</span>
+      <span class="section-title c-green">Prompt stack · Ready to use</span>
+    </div>
+
+    <div class="prompt-block">
+      <div class="prompt-header mix">
+        <span>01 · Intake / Scoping</span>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+      </div>
+      <div class="prompt-body">Scope this Signal Maps investigation before the relay starts.
+
+Topic: <span class="ph">[TOPIC]</span>
+Time window: <span class="ph">[DATE RANGE]</span>
+Geographic scope: <span class="ph">[PLACE]</span>
+Main question: <span class="ph">[QUESTION]</span>
+
+Known starting facts:
+<span class="ph">[LIST]</span>
+
+Claims to test:
+<span class="ph">[LIST]</span>
+
+Strong evidence FOR the leading interpretation:
+<span class="ph">[LIST]</span>
+
+Strong evidence AGAINST it:
+<span class="ph">[LIST]</span>
+
+Baseline source types:
+<span class="ph">[LIST]</span>
+
+Known source constraints:
+<span class="ph">[LIST]</span>
+
+Bias/framing risks:
+<span class="ph">[LIST]</span>
+
+Return:
+1. One-sentence investigation brief
+2. Verified starting facts vs claims to test
+3. Main ambiguities
+4. Rival hypotheses
+5. What evidence would narrow uncertainty fastest
+6. Which likely disagreements are evidentiary vs framing-based
+
+Do not answer the case yet. Tighten the brief.</div>
+    </div>
+
+    <div class="prompt-block">
+      <div class="prompt-header ds">
+        <span>02 · DeepSeek Research Pass</span>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+      </div>
+      <div class="prompt-body">Run the research-side pass for this Signal Maps case.
+
+Investigation brief:
+<span class="ph">[PASTE]</span>
+
+Return:
+
+A. Visible source map
+- which source ecosystems are carrying this?
+- which are thin, delayed, missing, or synchronized?
+
+B. Claims ledger
+For each major claim:
+- claim
+- source
+- source type
+- corroboration
+- weakening factors
+- confidence: High / Medium / Low / Very Low / Unverifiable
+
+C. Absences and routing
+- what expected signals are missing?
+- where does the signal appear instead?
+
+D. Rival hypotheses
+- support
+- counterevidence
+- what would distinguish them
+
+E. Proxy indicators to watch next
+- hospital / shipping / flight / market / legal / blackout / access signals
+
+F. Human impact note
+- who is counted
+- who is invisible
+
+Rules:
+- do not collapse claim and fact
+- do not turn absence into proof
+- mark intent claims Unverifiable unless directly evidenced
+
+Return a research memo, not polished prose.</div>
+    </div>
+
+    <div class="prompt-block">
+      <div class="prompt-header cg">
+        <span>03 · ChatGPT Synthesis Pass</span>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+      </div>
+      <div class="prompt-body">Run the synthesis-side pass for this Signal Maps case using the Exoplanet Method.
+
+Investigation brief:
+<span class="ph">[PASTE]</span>
+
+DeepSeek memo:
+<span class="ph">[PASTE]</span>
+
+Return:
+
+1. Center of gravity
+- what source environment dominates
+- what framing assumptions are doing work
+
+2. What is solid
+- verified facts
+- probable inferences
+- open hypotheses
+- disputed claims
+- narrative claims
+
+3. What is missing
+- expected evidence absent
+- whether the absence is meaningful or ambiguous
+
+4. Proxy logic
+- which proxies matter most
+- which are suggestive, strong, or near-direct
+
+5. Rival explanations
+- strongest competing readings
+- evidentiary vs framing disagreements
+
+6. Human cost
+- what harm is undercounted or obscured
+
+7. Best disciplined reading
+- strongest current synthesis
+- what must remain open
+
+End with a short wobble paragraph.
+
+Rules:
+- do not treat DeepSeek as ground truth
+- audit for overstatement and narrative neatness</div>
+    </div>
+
+    <div class="prompt-block">
+      <div class="prompt-header ds">
+        <span>04 · DeepSeek Challenge Pass</span>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+      </div>
+      <div class="prompt-body">Stress-test this ChatGPT synthesis memo.
+
+Investigation brief:
+<span class="ph">[PASTE]</span>
+
+ChatGPT memo:
+<span class="ph">[PASTE]</span>
+
+Identify:
+
+1. Missing source environments
+2. Overreach or overconfidence
+3. Hidden framing bias
+4. Strong rival readings
+5. Corrections
+- challenged sentence/idea
+- why weak
+- better wording or downgrade
+6. What ChatGPT got right
+
+Be direct. Improve the record, do not perform disagreement.</div>
+    </div>
+
+    <div class="prompt-block">
+      <div class="prompt-header cg">
+        <span>05 · ChatGPT Challenge Pass</span>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+      </div>
+      <div class="prompt-body">Audit this DeepSeek research memo using the Exoplanet Method and confidence discipline.
+
+Investigation brief:
+<span class="ph">[PASTE]</span>
+
+DeepSeek memo:
+<span class="ph">[PASTE]</span>
+
+Check:
+
+1. Source ecology
+- genuinely broad or only apparently broad?
+
+2. Claim discipline
+- confidence too high?
+- bundled claims that should be split?
+
+3. Absence discipline
+- where silence is overread
+- where absence is meaningful
+
+4. Proxy discipline
+- strong vs weak proxies
+
+5. Rival hypotheses
+- missing or underdeveloped alternatives
+
+6. Human cost and invisibility
+
+7. Revision notes
+- keep
+- downgrade
+- verify next
+- unresolved
+
+Do not flatten it into a Western corrective. Improve epistemic discipline.</div>
+    </div>
+
+    <div class="prompt-block">
+      <div class="prompt-header mix">
+        <span>06 · Reconciliation / Persistent Wobble</span>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+      </div>
+      <div class="prompt-body">Reconcile this Signal Maps record without forcing false closure.
+
+Materials:
+Scoping brief: <span class="ph">[PASTE]</span>
+DeepSeek memo: <span class="ph">[PASTE]</span>
+ChatGPT memo: <span class="ph">[PASTE]</span>
+DeepSeek critique: <span class="ph">[PASTE]</span>
+ChatGPT critique: <span class="ph">[PASTE]</span>
+
+Return:
+
+1. Agreed findings
+2. Evidentiary divergences
+3. Framing divergences
+4. Best current reading
+5. What remains unresolved
+- what would resolve it
+- what continued non-resolution may indicate
+6. Persistent wobble
+- one short paragraph in Signal Maps style
+
+Do not merge real disagreements just to make the output cleaner.</div>
+    </div>
+
+    <div class="prompt-block">
+      <div class="prompt-header audit">
+        <span>07 · Hallucination / Overreach Audit</span>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+      </div>
+      <div class="prompt-body">Audit this working record for anything more certain, specific, or coherent than the evidence supports.
+
+Working record:
+<span class="ph">[PASTE]</span>
+
+Return:
+
+1. Verifiable specifics
+2. Unverified specifics
+3. Unsupported causal links
+4. Narrative overcompression
+5. Downgrade recommendations
+- remove
+- soften
+- relabel as claim
+- relabel as inference
+- move to unresolved/wobble
+6. Wrong-if test
+- what would have to be true for the main reading to be wrong?
+
+Be strict. This is an epistemic honesty check, not a style pass.</div>
+    </div>
+
+    <div class="prompt-block">
+      <div class="prompt-header archive">
+        <span>08 · Archive Formatter</span>
+        <button class="copy-btn" onclick="copyPrompt(this)">Copy</button>
+      </div>
+      <div class="prompt-body">Convert this reconciled Signal Maps record into structured outputs that can feed the workbook, Signal Ledger, timeline, and site pages.
+
+Materials:
+<span class="ph">[PASTE RECONCILED RECORD]</span>
+<span class="ph">[PASTE AUDIT]</span>
+
+Requirements:
+- preserve uncertainty honestly
+- use confidence labels
+- keep claims separate from inferences
+- include proxy indicators
+- include dual reading where needed
+- include Persistent Wobble
+- end with a Bottom Line about the evidence structure
+
+Return:
+
+A. Signal Ledger entry
+- event time
+- signal time
+- case
+- claim / data point
+- epistemic type
+- confidence
+- routing note
+- rival explanations
+- what would resolve it
+- status
+- human impact note
+
+B. Timeline note
+C. Case-page update paragraph
+D. Homepage / ledger blurb
+E. Bottom line
+
+Keep the tone restrained, analytical, and archive-consistent.</div>
+    </div>
+
+    <div class="divider divider-amber"></div>
+
+    <div class="section-head" id="support">
+      <span class="section-num">06</span>
+      <span class="section-title c-amber">Core loop and support logic</span>
+    </div>
+
+    <div class="support-grid">
+      <div class="support-card">
+        <h3>Core analysis loop</h3>
+        <p>The minimum closed reasoning loop is Intake, DeepSeek Research, ChatGPT Synthesis, DeepSeek Challenge, ChatGPT Challenge, Reconciliation, and Final Audit. That is the part that creates disciplined friction and produces the best current reading without erasing uncertainty.</p>
+        <ul>
+          <li>shared question</li>
+          <li>independent model work</li>
+          <li>two-way challenge</li>
+          <li>structured reconciliation</li>
+          <li>final honesty check</li>
+        </ul>
+      </div>
+
+      <div class="support-card">
+        <h3>Operational support</h3>
+        <p>The Archive Formatter turns the analysis into stable project outputs. In the current workflow, that means structured handoff into the workbook, Signal Ledger, timeline, case pages, and homepage updates rather than a standalone daily template.</p>
+        <ul>
+          <li>ledger consistency</li>
+          <li>comparability over time</li>
+          <li>faster daily execution</li>
+          <li>cleaner handoff to site pages or logs</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="divider divider-blue"></div>
+
+    <div class="section-head" id="archive">
+      <span class="section-num">07</span>
+      <span class="section-title c-blue">How output gets archived</span>
+    </div>
+
+    <div class="archive-grid">
+      <div class="info-card cg">
+        <h3>What the record keeps</h3>
+        <ul>
+          <li>confidence-graded claims</li>
+          <li>separate event time and signal time</li>
+          <li>epistemic type, routing, and rival explanations</li>
+          <li>proxy indicators worth carrying forward</li>
+          <li>persistent wobble with open, contested, and resolved items</li>
+          <li>a bottom line focused on the evidence structure</li>
+        </ul>
+      </div>
+
+      <div class="info-card ds">
+        <h3>Why the archive matters</h3>
+        <ul>
+          <li>today’s uncertainty becomes tomorrow’s comparison set</li>
+          <li>recurring absences become patterns rather than isolated impressions</li>
+          <li>model disagreements become data points in their own right</li>
+          <li>the record stays usable even when certainty never fully arrives</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="foot">
+      <span>Workflow Relay · Signal Maps · March 2026</span>
+      <span><a href="index.html">Home</a> · <a href="exoplanet-method.html">Method</a> · <a href="cases.html">Cases</a></span>
+    </div>
+  </main>
+
+<script>
+function copyPrompt(btn) {
+  const body = btn.closest('.prompt-block').querySelector('.prompt-body');
+  navigator.clipboard.writeText(body.innerText).then(() => {
+    btn.textContent = 'Copied ✓';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+</body>
+</html>

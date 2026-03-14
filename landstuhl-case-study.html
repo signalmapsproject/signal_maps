@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Landstuhl Case Study · Signal Maps</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  :root {
+    --bg: #050810;
+    --bg-soft: #0b1220;
+    --panel: rgba(255,255,255,0.03);
+    --panel-strong: rgba(255,255,255,0.045);
+    --accent: #4fc3f7;
+    --accent-2: #8be9fd;
+    --warn: #ff6b6b;
+    --amber: #f0a500;
+    --green: #66bb6a;
+    --purple: #b39ddb;
+    --text: #c8d8e8;
+    --muted: #7e97aa;
+    --dim: #355064;
+    --border: rgba(255,255,255,0.08);
+    --shadow: 0 18px 40px rgba(0,0,0,0.25);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.40) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 60%, rgba(255,255,255,0.28) 0%, transparent 100%),
+      radial-gradient(1px 1px at 50% 10%, rgba(255,255,255,0.18) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 80%, rgba(255,255,255,0.32) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 30%, rgba(255,255,255,0.26) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .skip-link {
+    position: absolute;
+    left: -9999px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .skip-link:focus {
+    left: 1rem;
+    top: 1rem;
+    width: auto;
+    height: auto;
+    padding: 0.7rem 0.9rem;
+    background: var(--bg-soft);
+    color: var(--accent-2);
+    border: 1px solid var(--accent);
+    z-index: 1000;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    text-decoration: none;
+  }
+
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(5,8,16,0.94);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.9rem 1.5rem;
+    font-family: 'Space Mono', monospace;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  nav a,
+  nav span {
+    font-size: 0.56rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+
+  .nav-home {
+    color: var(--accent);
+  }
+
+  .nav-home:hover,
+  .nav-home:focus {
+    color: var(--accent-2);
+  }
+
+  .nav-sep,
+  .nav-current {
+    color: var(--dim);
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 5;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 0 1.5rem 3rem;
+  }
+
+  .hero,
+  .card,
+  .table-wrap,
+  .pull,
+  .inference {
+    box-shadow: var(--shadow);
+  }
+
+  .hero {
+    padding: 4rem 0 2.5rem;
+    border-bottom: 1px solid rgba(79,195,247,0.10);
+    margin-bottom: 2rem;
+  }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-family: 'Crimson Pro', serif;
+    font-weight: 300;
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+    line-height: 1.08;
+    color: #e8f4f8;
+    margin-bottom: 1rem;
+  }
+
+  h1 em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .intro {
+    font-size: 1.04rem;
+    line-height: 1.72;
+    color: var(--muted);
+    max-width: 720px;
+  }
+
+  .meta-note {
+    margin-top: 1.2rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.56rem;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.8rem;
+    margin: 2rem 0 1rem;
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.56rem;
+    color: var(--dim);
+    letter-spacing: 0.12em;
+  }
+
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.64rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .c-blue { color: var(--accent); }
+  .c-amber { color: var(--amber); }
+  .c-warn { color: var(--warn); }
+
+  .card,
+  .pull,
+  .inference,
+  .table-wrap {
+    border-radius: 18px;
+  }
+
+  .card {
+    margin-bottom: 1rem;
+    padding: 1.2rem 1.3rem;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--dim);
+  }
+
+  .card-blue { border-left-color: var(--accent); }
+  .card-amber { border-left-color: var(--amber); }
+  .card-warn { border-left-color: var(--warn); }
+
+  .card-title {
+    font-size: 1.05rem;
+    color: #e8f4f8;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+  }
+
+  .card p {
+    font-size: 0.97rem;
+    line-height: 1.68;
+    margin-bottom: 0.5rem;
+  }
+
+  .card p:last-child { margin-bottom: 0; }
+
+  .source-note {
+    margin-top: 0.75rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid var(--border);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    background: rgba(255,255,255,0.015);
+    border: 1px solid var(--border);
+    margin-bottom: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 650px;
+  }
+
+  th,
+  td {
+    padding: 0.8rem;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: top;
+  }
+
+  th {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-align: left;
+  }
+
+  td {
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.42rem;
+    border-radius: 2px;
+  }
+
+  .badge-high {
+    background: rgba(79,195,247,0.15);
+    color: var(--accent);
+  }
+
+  .badge-med {
+    background: rgba(240,165,0,0.15);
+    color: var(--amber);
+  }
+
+  .badge-low {
+    background: rgba(255,107,107,0.12);
+    color: var(--warn);
+  }
+
+  .pull {
+    margin: 1.25rem 0;
+    padding: 1.25rem 1.5rem;
+    border-left: 3px solid var(--accent);
+    background: rgba(79,195,247,0.04);
+  }
+
+  .pull p {
+    font-size: 0.98rem;
+    line-height: 1.7;
+    color: #e8f4f8;
+    font-style: italic;
+  }
+
+  .inference {
+    margin: 2rem 0 1rem;
+    padding: 1.5rem;
+    border: 1px solid rgba(79,195,247,0.15);
+    background: rgba(79,195,247,0.03);
+    position: relative;
+  }
+
+  .inference::before {
+    content: 'CURRENT JUDGMENT';
+    position: absolute;
+    top: -0.58rem;
+    left: 1rem;
+    background: var(--bg);
+    padding: 0 0.4rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+  }
+
+  .foot {
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.52rem;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .foot a {
+    color: var(--dim);
+    text-decoration: none;
+  }
+
+  .foot a:hover,
+  .foot a:focus {
+    color: var(--accent);
+  }
+
+  @media (max-width: 640px) {
+    .wrap { padding: 0 1rem 2rem; }
+    nav { padding: 0.8rem 1rem; }
+  }
+</style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to content</a>
+
+<nav aria-label="Breadcrumb">
+  <a href="index.html" class="nav-home">Signal Maps</a>
+  <span class="nav-sep">/</span>
+  <a href="cases.html" class="nav-home">Cases</a>
+  <span class="nav-sep">/</span>
+  <span class="nav-current">Landstuhl Case Study</span>
+</nav>
+
+<main id="main-content" class="wrap">
+  <header class="hero">
+    <div class="eyebrow">Case Study · Proxy Indicator · March 2026</div>
+    <h1>Landstuhl.<br><em>The Ward Closure.</em><br>The Proxy Signal.</h1>
+    <p class="intro">
+      Landstuhl Regional Medical Center is one of the few institutional systems in this project that could reveal pressure without intending to. When the hospital suspended labor and delivery services around March 3–4, 2026, that did not disclose a casualty total. It did, however, create a rare public signal of medical-capacity strain during the war.
+    </p>
+    <div class="meta-note">This page treats Landstuhl as a proxy-indicator case, not as standalone proof of concealed casualty volume.</div>
+  </header>
+
+  <section aria-labelledby="observable-heading">
+    <div class="section-head">
+      <span class="section-num">01</span>
+      <h2 id="observable-heading" class="section-title c-blue">The Observable · What is directly visible</h2>
+    </div>
+
+    <div class="card card-blue">
+      <div class="card-title">What Landstuhl is</div>
+      <p>
+        Landstuhl Regional Medical Center is one of the central medical nodes in the U.S. military system outside the United States. In the project record, it appears as a major transfer point for wounded American personnel moving through Europe, Africa, and the Middle East.
+      </p>
+      <div class="source-note">Project source map and Landstuhl case materials</div>
+    </div>
+
+    <div class="card card-blue">
+      <div class="card-title">What changed</div>
+      <p>
+        Around March 3–4, 2026, Landstuhl suspended labor and delivery services and referred pregnant military families to local German hospitals. In the project record, that operational change surfaced through specialist military coverage rather than broad civilian reporting.
+      </p>
+      <div class="source-note">Project source map · military press signal</div>
+    </div>
+  </section>
+
+  <section aria-labelledby="signal-chain-heading">
+    <div class="section-head">
+      <span class="section-num">02</span>
+      <h2 id="signal-chain-heading" class="section-title c-amber">Signal chain · Observable to inference</h2>
+    </div>
+
+    <div class="card card-amber">
+      <div class="card-title">Step 1 · Operational change</div>
+      <p>
+        A hospital service line was suspended. That is a concrete administrative act, not a rumor and not a rhetorical claim.
+      </p>
+    </div>
+
+    <div class="card card-amber">
+      <div class="card-title">Step 2 · Capacity is being protected or reallocated</div>
+      <p>
+        Labor and delivery is not the kind of function a hospital casually interrupts. Patients have to be rerouted, families have to be informed, and the institution has to absorb reputational and practical disruption. That makes the change hard to treat as trivial.
+      </p>
+    </div>
+
+    <div class="card card-warn">
+      <div class="card-title">Step 3 · The inference is strain, not a casualty count</div>
+      <p>
+        The strongest disciplined reading is that Landstuhl experienced enough pressure, or expected enough pressure, to justify reallocating capacity. What this does not provide is a clean number, a breakdown of patient categories, or a self-contained proof of hidden casualty volume.
+      </p>
+    </div>
+  </section>
+
+  <section aria-labelledby="why-matters-heading">
+    <div class="section-head">
+      <span class="section-num">03</span>
+      <h2 id="why-matters-heading" class="section-title c-blue">Why this matters · And what it does not prove</h2>
+    </div>
+
+    <div class="card card-blue">
+      <div class="card-title">Why the signal is strong</div>
+      <p>
+        Hospitals do not suspend a service line like labor and delivery casually. Because patients must be notified and rerouted, this kind of operational change is harder to keep invisible than a briefing decision or a casualty spreadsheet. That makes it a strong proxy indicator of system strain.
+      </p>
+      <p>
+        In the Exoplanet Method, Landstuhl matters because it is an unavoidable disclosure created by institutional operations rather than by voluntary transparency.
+      </p>
+    </div>
+
+    <div class="card card-warn">
+      <div class="card-title">What it does not establish</div>
+      <p>
+        The ward closure does not tell us how many wounded arrived, what share were combat casualties, or whether the hospital was responding only to this conflict rather than to broader regional or contingency demands. It is consistent with elevated casualty pressure. It is not a quantified intake report.
+      </p>
+    </div>
+  </section>
+
+  <section aria-labelledby="method-read-heading">
+    <div class="section-head">
+      <span class="section-num">04</span>
+      <h2 id="method-read-heading" class="section-title c-blue">Method read · Why this is a proxy case</h2>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Assessment</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Claim type</td>
+            <td><span class="badge badge-high">Proxy indicator</span></td>
+            <td>Operational hospital change rather than direct casualty disclosure.</td>
+          </tr>
+          <tr>
+            <td>Epistemic status</td>
+            <td><span class="badge badge-med">Probable inference</span></td>
+            <td>Supports the inference of capacity strain, but does not fix casualty totals.</td>
+          </tr>
+          <tr>
+            <td>Directional routing</td>
+            <td><span class="badge badge-med">Narrow visibility</span></td>
+            <td>Surfaced through specialist military press, then became more meaningful only when amplified into broader analysis.</td>
+          </tr>
+          <tr>
+            <td>Absence pattern</td>
+            <td><span class="badge badge-med">Structural / incidental mix</span></td>
+            <td>Major civilian outlets did not center it. That may reflect editorial priorities, limited visibility, or wider casualty opacity.</td>
+          </tr>
+          <tr>
+            <td>Proxy grade</td>
+            <td><span class="badge badge-high">Strong</span></td>
+            <td>Rare public operational change that likely would not occur without real strain, but still remains indirect.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section aria-labelledby="rival-heading">
+    <div class="section-head">
+      <span class="section-num">05</span>
+      <h2 id="rival-heading" class="section-title c-amber">Rival explanations</h2>
+    </div>
+
+    <div class="card card-amber">
+      <div class="card-title">Primary interpretation</div>
+      <p>
+        The strongest reading is that Landstuhl experienced enough trauma-related pressure to reallocate capacity and suspend labor and delivery services. That makes the closure a meaningful proxy for wartime medical strain.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Rival hypothesis 1 · Precautionary planning</div>
+      <p>
+        The suspension may have been partly anticipatory, taken to clear capacity for expected casualties rather than already-arrived casualties. That would still indicate serious operational concern, but it would weaken claims about immediate intake volume.
+      </p>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Rival hypothesis 2 · Broader regional burden</div>
+      <p>
+        The hospital may have been responding to a wider regional medical load rather than only to one conflict stream. This possibility should remain open unless direct transport or intake data appear.
+      </p>
+    </div>
+
+    <div class="card card-warn">
+      <div class="card-title">Rival hypothesis 3 · Overreading a single operational signal</div>
+      <p>
+        The project has to guard against taking one dramatic proxy and letting it stand in for a full casualty picture. A strong proxy is still only one part of the evidence map.
+      </p>
+    </div>
+  </section>
+
+  <section aria-labelledby="routing-heading">
+    <div class="section-head">
+      <span class="section-num">06</span>
+      <h2 id="routing-heading" class="section-title c-blue">Why the routing matters</h2>
+    </div>
+
+    <div class="card card-blue">
+      <div class="card-title">A signal visible to specialists, dim to everyone else</div>
+      <p>
+        In the project’s source map, specialist military outlets appear as the clearest visible carriers of the Landstuhl maternity-ward closure. That routing pattern is part of the case. A high-value operational signal existed, but it largely stayed inside the military-information ecosystem.
+      </p>
+      <p>
+        This does not, by itself, prove suppression. It does show how an important proxy can remain effectively absent from mainstream public understanding even when it is technically published.
+      </p>
+    </div>
+  </section>
+
+  <div class="pull">
+    <p>
+      Landstuhl is useful not because it solves the casualty question, but because it shows the kind of evidence that escapes rhetoric when institutions still have to keep operating.
+    </p>
+  </div>
+
+  <section aria-labelledby="judgment-heading">
+    <div class="section-head">
+      <span class="section-num">07</span>
+      <h2 id="judgment-heading" class="section-title c-warn">Current judgment</h2>
+    </div>
+
+    <div class="inference">
+      <p>
+        The Landstuhl ward closure is one of the strongest proxy indicators in the project, but it should be presented carefully. It supports the claim that wartime medical strain was serious enough to alter hospital operations. It does not, by itself, reveal hidden totals or establish the full scale of casualties. The right public framing is: <strong>strong proxy, limited quantification, high interpretive value when paired with other signals.</strong>
+      </p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>Case Study · Landstuhl · Proxy Indicator</span>
+    <span><a href="index.html">Home</a> · <a href="cases.html">Cases</a> · <a href="exoplanet-method.html">Method</a></span>
+  </footer>
+</main>
+</body>
+</html>

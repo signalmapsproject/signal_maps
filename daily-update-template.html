@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deep Signal Map · Day [N] · [DATE]</title>
+<!--
+  ═══════════════════════════════════════════════════════
+  DAILY UPDATE TEMPLATE — Signal Maps
+  Two-model relay: DeepSeek (research) + ChatGPT (synthesis)
+  
+  HOW TO FILL THIS IN:
+  1. Replace [DAY_NUMBER] with the current day (e.g. 10)
+  2. Replace [DATE] with full date (e.g. March 9, 2026)
+  3. Replace [INTRO_SUMMARY] with 2-3 sentence framing
+  4. Fill each section with today's claims + grades
+  5. Fill the dual-reading section with today's signals
+  6. Write the bottom-line inference last
+  7. Update the footer with today's date + day number
+  8. Save as deep-signal-map-day[N].html
+  
+  CONFIDENCE BADGE GUIDE:
+  badge-high   → Technical data, satellite imagery, named official on record, 
+                 unavoidable disclosure (hospital notification, border count)
+  badge-medium → Interested party with partial corroboration from second source
+  badge-low    → Single interested source, no independent confirmation
+  badge-vlow   → Single unnamed source, could be trial balloon or disinformation
+  badge-unver  → Intent-based claim, structurally unverifiable
+  ═══════════════════════════════════════════════════════
+-->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&display=swap');
+
+  :root {
+    --bg: #050810;
+    --bg-soft: #0b1220;
+    --panel: rgba(255,255,255,0.03);
+    --panel-strong: rgba(255,255,255,0.045);
+    --accent: #4fc3f7;
+    --accent-2: #8be9fd;
+    --warn: #ff6b6b;
+    --amber: #f0a500;
+    --green: #66bb6a;
+    --purple: #b39ddb;
+    --text: #c8d8e8;
+    --muted: #7e97aa;
+    --dim: #355064;
+    --border: rgba(255,255,255,0.08);
+    --card-bg: rgba(255,255,255,0.03);
+    --card-bg-strong: rgba(255,255,255,0.05);
+    --shadow: 0 18px 40px rgba(0,0,0,.25);
+    --max: 1180px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: radial-gradient(circle at top, rgba(79,195,247,0.10), transparent 34%), linear-gradient(180deg, rgba(79,195,247,0.02), transparent 26%), var(--bg);
+    color: var(--text);
+    font-family: 'Crimson Pro', Georgia, serif;
+    line-height: 1.72;
+    padding: 0 0 4rem;
+  }
+
+  body::before { content:''; position:fixed; inset:0; pointer-events:none; background: radial-gradient(circle at 14% 8%, rgba(79,195,247,0.08), transparent 22%), radial-gradient(circle at 82% 0%, rgba(139,233,253,0.05), transparent 20%); opacity:.92; }
+
+  nav { display:flex; gap:1rem; align-items:center; flex-wrap:wrap; padding:1rem max(1.5rem, calc((100vw - 1040px) / 2)); border-bottom:1px solid var(--border); position:sticky; top:0; backdrop-filter:blur(12px); background:rgba(5,8,16,0.82); z-index:10; }
+  nav a, nav span { font-family:'Space Mono', monospace; font-size:0.62rem; letter-spacing:0.14em; text-transform:uppercase; text-decoration:none; }
+  nav a { color: var(--muted); }
+  nav a:hover { color: var(--accent); }
+  nav .current { color: var(--accent); }
+
+  .hero { max-width:1040px; width:min(100% - 3rem, 1040px); margin:0 auto; padding:2.85rem 0 1.8rem; position:relative; }
+  .hero::after { content:''; position:absolute; inset:auto 0 0; height:1px; background:linear-gradient(90deg, rgba(79,195,247,0.28), transparent 72%); }
+  .hero-inner { background: linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.02)); border: 1px solid var(--border); border-radius: 22px; padding: 1.35rem 1.4rem; box-shadow: var(--shadow); }
+
+  .eyebrow {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.25em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-family: 'Crimson Pro', serif;
+    font-weight: 300;
+    font-size: clamp(1.6rem, 4vw, 2.5rem);
+    line-height: 1.1;
+    color: #e8f4f8;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 em { font-style: italic; color: var(--accent-2); }
+
+  .intro {
+    font-size: 1.04rem;
+    font-weight: 300;
+    color: var(--muted);
+    margin-bottom: 1.5rem;
+    max-width: 720px;
+  }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(to right, rgba(79,195,247,0.32), rgba(139,233,253,0.12), transparent 78%);
+    max-width:1040px; width:min(100% - 3rem, 1040px); margin: 1.6rem auto 2rem;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    max-width:1040px; width:min(100% - 3rem, 1040px); margin: 2.7rem auto 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .section-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.52rem;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .section-title.warn  { color: var(--warn); }
+  .section-title.amber { color: var(--amber); }
+  .section-title.dim   { color: var(--muted); }
+  .section-title.green { color: var(--green); }
+
+  /* ── CARDS ── */
+  .card { padding: 1.1rem 1.2rem; margin: 0 auto 1rem; max-width: 980px; width: min(100% - 3rem, 1040px); border-left: 3px solid var(--dim); border: 1px solid var(--border); border-left-width: 3px; background: var(--card-bg); border-radius: 18px; box-shadow: var(--shadow); }
+
+  .card-warn  { border-left-color: var(--warn); }
+  .card-amber { border-left-color: var(--amber); }
+  .card-blue  { border-left-color: var(--accent); }
+  .card-green { border-left-color: var(--green); }
+
+  .card-title {
+    font-family: 'Crimson Pro', serif;
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #e8f4f8;
+    margin-bottom: 0.5rem;
+  }
+
+  .card p {
+    font-size: 1.01rem;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+
+  .card p:last-child { margin-bottom: 0; }
+  .card p strong { color: #e8f4f8; font-weight: 400; }
+
+  .source-note {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    color: var(--dim);
+    letter-spacing: 0.08em;
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ── CONFIDENCE TABLE ── */
+  .conf-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+    margin: 0.5rem 0 0.25rem;
+  }
+
+  .conf-table th {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.46rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--dim);
+    text-align: left;
+    padding: 0.4rem 0.5rem 0.4rem 0;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+
+  .conf-table td {
+    padding: 0.5rem 0.5rem 0.5rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+    color: var(--text);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .conf-table tr:last-child td { border-bottom: none; }
+
+  .conf-table td.claim  { color: #e8f4f8; font-size: 0.85rem; }
+  .conf-table td.source { color: var(--muted); font-style: italic; font-size: 0.78rem; }
+  .conf-table td.note   { color: var(--muted); font-size: 0.76rem; }
+
+  /* ── CONFIDENCE BADGES ── */
+  .badge {
+    display: inline-block;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.43rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.15rem 0.4rem;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .badge-high   { background: rgba(79,195,247,0.15);  color: var(--accent); }
+  .badge-medium { background: rgba(240,165,0,0.15);   color: var(--amber); }
+  .badge-low    { background: rgba(255,107,107,0.12); color: var(--warn); }
+  .badge-vlow   { background: rgba(255,107,107,0.2);  color: #ff9a9a; }
+  .badge-unver  { background: rgba(74,96,112,0.3);    color: var(--muted); }
+
+  /* ── BADGE LEGEND ── */
+  .badge-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1rem 0 1.5rem;
+    padding: 0.75rem 1rem;
+    background: rgba(255,255,255,0.015);
+    border-left: 2px solid var(--dim);
+  }
+
+  .badge-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  /* ── WOBBLE LIST ── */
+  .wobble-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .wobble-list li {
+    font-size: 0.98rem;
+    line-height: 1.65;
+    color: var(--text);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0.75rem;
+    align-items: baseline;
+  }
+
+  .wobble-list li:last-child { border-bottom: none; }
+
+  .wobble-marker {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.55rem;
+    color: var(--warn);
+    flex-shrink: 0;
+    letter-spacing: 0.05em;
+    padding-top: 0.1rem;
+  }
+
+  .wobble-marker.resolved { color: var(--green); }
+
+  /* ── PULL QUOTE ── */
+  .pull-quote {
+    margin: 1.25rem 0;
+    padding: 1.25rem 1.5rem;
+    border-left: 3px solid var(--warn);
+    background: rgba(255,107,107,0.04);
+  }
+
+  .pull-quote p {
+    font-size: 1rem;
+    font-style: italic;
+    font-weight: 300;
+    color: #e8f4f8;
+    line-height: 1.65;
+    margin-bottom: 0.4rem;
+  }
+
+  .pull-quote cite {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-style: normal;
+  }
+
+  /* ── DUAL READING ── */
+  .dual-read {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    margin-bottom: 1px;
+  }
+
+  .dual-cell {
+    padding: 1rem 1.1rem;
+    background: rgba(255,255,255,0.02);
+  }
+
+  .dual-cell.escalation  { border-left: 2px solid var(--warn); }
+  .dual-cell.containment { border-left: 2px solid var(--green); }
+
+  .dual-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.5rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .dual-label.warn  { color: var(--warn); }
+  .dual-label.green { color: var(--green); }
+
+  .dual-cell ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .dual-cell ul li {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text);
+    padding: 0.2rem 0;
+    border-bottom: 1px solid rgba(255,255,255,0.02);
+  }
+
+  .dual-cell ul li:last-child { border-bottom: none; }
+
+  .dual-cell ul li::before {
+    content: '· ';
+    color: var(--dim);
+  }
+
+  /* ── PROXY INDICATORS ── */
+  .proxy-row {
+    display: flex;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+    align-items: baseline;
+  }
+
+  .proxy-row:last-child { border-bottom: none; }
+
+  .proxy-signal {
+    font-size: 0.95rem;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .proxy-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--amber);
+    flex-shrink: 0;
+    text-align: right;
+  }
+
+  .proxy-value.red  { color: var(--warn); }
+  .proxy-value.blue { color: var(--accent); }
+  .proxy-value.green { color: var(--green); }
+
+  /* ── INFERENCE ── */
+  .inference {
+    margin-top: 2.8rem; max-width:1040px; width:min(100% - 3rem, 1040px); margin-left:auto; margin-right:auto;
+    padding: 1.5rem;
+    border: 1px solid rgba(255,107,107,0.2);
+    background: rgba(255,107,107,0.03);
+  }
+
+  .inference-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.55rem;
+    letter-spacing: 0.2em;
+    color: var(--warn);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  .inference p {
+    font-size: 0.93rem;
+    line-height: 1.75;
+    color: var(--text);
+    font-weight: 300;
+    margin-bottom: 0.6rem;
+  }
+
+  .inference p:last-child { margin-bottom: 0; }
+  .inference strong { color: #e8f4f8; font-weight: 400; }
+
+  /* ── FOOTER ── */
+  .foot {
+    margin-top: 2.8rem; max-width:1040px; width:min(100% - 3rem, 1040px); margin-left:auto; margin-right:auto;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.52rem;
+    color: var(--dim);
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  @media (max-width: 540px) {
+    .dual-read { grid-template-columns: 1fr; }
+    .conf-table th:nth-child(3),
+    .conf-table td:nth-child(3) { display: none; }
+    .proxy-row { flex-direction: column; gap: 0.1rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html">&larr; Home</a>
+  <a href="timeline.html">Timeline</a>
+  <a href="exoplanet-method.html">Method</a>
+  <span class="current">Daily Update Template</span>
+</nav>
+
+<!-- ═══ HEADER — update day number and date ═══ -->
+<section class="hero">
+<div class="hero-inner">
+  <div class="eyebrow">Deep Signal Map · Iran Conflict · Day [DAY_NUMBER] · [DATE]</div>
+<h1>What we think<br>we know.<br><em>Stress-tested.</em></h1>
+<p class="intro">[INTRO_SUMMARY — 2-3 sentences. What happened today. What the dominant frame is. What the stress-test will reveal about it.]</p>
+</div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BADGE LEGEND -->
+<div class="badge-legend">
+  <div class="badge-legend-item"><span class="badge badge-high">High</span> Technical data / unavoidable disclosure</div>
+  <div class="badge-legend-item"><span class="badge badge-medium">Medium</span> Interested party + partial corroboration</div>
+  <div class="badge-legend-item"><span class="badge badge-low">Low</span> Single interested source</div>
+  <div class="badge-legend-item"><span class="badge badge-vlow">Very Low</span> Single unnamed source</div>
+  <div class="badge-legend-item"><span class="badge badge-unver">Unverifiable</span> Intent-based claim</div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+  PROXY INDICATORS — fill these first
+  These are the hard numbers that are hardest to suppress.
+  Sources: Cloudflare Radar, MarineTraffic, Bloomberg,
+  ADS-B Exchange, hospital notifications.
+════════════════════════════════════════════ -->
+<div class="section-head">
+  <span class="section-num">00</span>
+  <span class="section-title">Today's Proxy Indicators</span>
+</div>
+
+<div class="card card-blue">
+  <div class="card-title">Hard numbers — hardest to suppress</div>
+  <div class="proxy-row">
+    <div class="proxy-signal">Iran internet connectivity (Cloudflare Radar)</div>
+    <div class="proxy-value red">[X]% of normal</div>
+  </div>
+  <div class="proxy-row">
+    <div class="proxy-signal">Strait of Hormuz daily transits</div>
+    <div class="proxy-value red">[X] (vs. 138–153 normal)</div>
+  </div>
+  <div class="proxy-row">
+    <div class="proxy-signal">Brent crude</div>
+    <div class="proxy-value">[$/barrel] ([+/-X]% change)</div>
+  </div>
+  <div class="proxy-row">
+    <div class="proxy-signal">Vessels stranded / Gulf region</div>
+    <div class="proxy-value red">~[X] total</div>
+  </div>
+  <div class="proxy-row">
+    <div class="proxy-signal">Landstuhl operational status</div>
+    <div class="proxy-value">[Normal / Restricted / Maternity suspended]</div>
+  </div>
+  <div class="proxy-row">
+    <div class="proxy-signal">U.S. military briefing status</div>
+    <div class="proxy-value red">[X] days since last briefing</div>
+  </div>
+  <div class="proxy-row">
+    <div class="proxy-signal">[ADD ADDITIONAL PROXY]</div>
+    <div class="proxy-value">[VALUE]</div>
+  </div>
+  <div class="source-note">Sources: Cloudflare Radar · MarineTraffic · Bloomberg · Military Times · [add sources]</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+  SECTION 01 — Lead story / biggest claim today
+  Title format: [TOPIC] — [What the framing question is]
+════════════════════════════════════════════ -->
+<div class="section-head">
+  <span class="section-num">01</span>
+  <span class="section-title warn">[SECTION TITLE] — [FRAMING QUESTION]</span>
+</div>
+
+<div class="card card-amber">
+  <div class="card-title">What's being reported</div>
+  <p>[2-4 sentence summary of today's dominant claims in this area. Quote specific numbers and sources. Write exactly what officials/media are saying, not what you think is true.]</p>
+</div>
+
+<div class="card">
+  <div class="card-title">Claims — graded</div>
+  <table class="conf-table">
+    <thead>
+      <tr>
+        <th style="width:28%">Claim</th>
+        <th style="width:18%">Source</th>
+        <th style="width:30%">Notes</th>
+        <th style="width:12%">Confidence</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="claim">[Specific claim 1]</td>
+        <td class="source">[Who said it]</td>
+        <td class="note">[Why to trust or question it. What would change the grade. What's missing.]</td>
+        <td><span class="badge badge-high">High</span></td>
+      </tr>
+      <tr>
+        <td class="claim">[Specific claim 2]</td>
+        <td class="source">[Who said it]</td>
+        <td class="note">[Why to trust or question it.]</td>
+        <td><span class="badge badge-medium">Medium</span></td>
+      </tr>
+      <tr>
+        <td class="claim">[Specific claim 3]</td>
+        <td class="source">[Who said it]</td>
+        <td class="note">[Why to trust or question it.]</td>
+        <td><span class="badge badge-low">Low</span></td>
+      </tr>
+      <!-- Add rows as needed. Remove unused rows. -->
+    </tbody>
+  </table>
+  <div class="source-note">[1-2 sentence editorial note on the pattern of sources in this section. What does the constellation of interested parties tell you about what's likely true?]</div>
+</div>
+
+<!-- Optional: pull quote if a civilian or non-official voice escaped the blackout today -->
+<!--
+<div class="pull-quote">
+  <p>"[QUOTE]"</p>
+  <cite>— [Attribution · Source · Date]</cite>
+</div>
+-->
+
+
+<!-- ═══════════════════════════════════════════
+  SECTION 02 — Second major story
+════════════════════════════════════════════ -->
+<div class="section-head">
+  <span class="section-num">02</span>
+  <span class="section-title warn">[SECTION TITLE] — [FRAMING QUESTION]</span>
+</div>
+
+<div class="card card-amber">
+  <div class="card-title">What's being reported</div>
+  <p>[Summary]</p>
+</div>
+
+<div class="card">
+  <div class="card-title">Claims — graded</div>
+  <table class="conf-table">
+    <thead>
+      <tr>
+        <th style="width:28%">Claim</th>
+        <th style="width:18%">Source</th>
+        <th style="width:30%">Notes</th>
+        <th style="width:12%">Confidence</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="claim">[Claim]</td>
+        <td class="source">[Source]</td>
+        <td class="note">[Notes]</td>
+        <td><span class="badge badge-medium">Medium</span></td>
+      </tr>
+      <tr>
+        <td class="claim">[Claim]</td>
+        <td class="source">[Source]</td>
+        <td class="note">[Notes]</td>
+        <td><span class="badge badge-vlow">Very Low</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="source-note">[Editorial note]</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+  SECTION 03 — Third major story
+  (duplicate and add sections as needed)
+════════════════════════════════════════════ -->
+<div class="section-head">
+  <span class="section-num">03</span>
+  <span class="section-title">[SECTION TITLE]</span>
+</div>
+
+<div class="card card-amber">
+  <div class="card-title">What's being reported</div>
+  <p>[Summary]</p>
+</div>
+
+<div class="card">
+  <div class="card-title">Claims — graded</div>
+  <table class="conf-table">
+    <thead>
+      <tr>
+        <th style="width:28%">Claim</th>
+        <th style="width:18%">Source</th>
+        <th style="width:30%">Notes</th>
+        <th style="width:12%">Confidence</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="claim">[Claim]</td>
+        <td class="source">[Source]</td>
+        <td class="note">[Notes]</td>
+        <td><span class="badge badge-high">High</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="source-note">[Editorial note]</div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+  DUAL READING — REQUIRED EVERY DAY
+  Find the two legitimate readings of today's events.
+  Both must be supportable by actual evidence.
+  The point is to show the frame is a choice.
+════════════════════════════════════════════ -->
+<div class="section-head">
+  <span class="section-num">04</span>
+  <span class="section-title amber">Two Readings — Both Supported by the Evidence</span>
+</div>
+
+<div class="card card-blue">
+  <div class="card-title">The same facts, two frames</div>
+  <p>[1-2 sentences establishing what the dominant frame is today, and that an alternative reading exists. Both must be honest — this is not bothsidesism, it's forcing the reader to see the framing as a choice.]</p>
+</div>
+
+<div class="dual-read">
+  <div class="dual-cell escalation">
+    <div class="dual-label warn">[READING ONE — e.g. Escalation]</div>
+    <ul>
+      <li>[Signal supporting this reading]</li>
+      <li>[Signal supporting this reading]</li>
+      <li>[Signal supporting this reading]</li>
+      <li>[Signal supporting this reading]</li>
+      <li>[Signal supporting this reading]</li>
+    </ul>
+  </div>
+  <div class="dual-cell containment">
+    <div class="dual-label green">[READING TWO — e.g. Containment / De-escalation]</div>
+    <ul>
+      <li>[Signal supporting this reading]</li>
+      <li>[Signal supporting this reading]</li>
+      <li>[Signal supporting this reading]</li>
+      <li>[Signal supporting this reading]</li>
+      <li>[Signal supporting this reading]</li>
+    </ul>
+  </div>
+</div>
+
+<div class="card card-warn">
+  <div class="card-title">What the dual reading means today</div>
+  <p>[Which proxies would resolve the ambiguity? What should we watch for tomorrow that would confirm one reading over the other?]</p>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+  PERSISTENT WOBBLE — REQUIRED EVERY DAY
+  Items that remain unresolved from previous days.
+  Mark RESOLVED in green when something is confirmed.
+  Add new OPEN items as they emerge.
+════════════════════════════════════════════ -->
+<div class="section-head">
+  <span class="section-num">05</span>
+  <span class="section-title warn">The Persistent Wobble — Still Open</span>
+</div>
+
+<div class="card card-warn">
+  <ul class="wobble-list">
+
+    <!-- TEMPLATE: Unresolved item -->
+    <li>
+      <span class="wobble-marker">OPEN →</span>
+      <span><strong>[TOPIC]</strong> [What remains unknown and why. What would resolve it. What the absence of resolution tells us.]</span>
+    </li>
+
+    <!-- TEMPLATE: Newly opened item today -->
+    <li>
+      <span class="wobble-marker">NEW →</span>
+      <span><strong>[TOPIC]</strong> [What emerged today that raises new uncertainty.]</span>
+    </li>
+
+    <!-- TEMPLATE: Resolved item — move to green when confirmed -->
+    <!--
+    <li>
+      <span class="wobble-marker resolved">RESOLVED →</span>
+      <span><strong>[TOPIC]</strong> [What was confirmed, by whom, at what confidence level.]</span>
+    </li>
+    -->
+
+    <li>
+      <span class="wobble-marker">OPEN →</span>
+      <span><strong>Independent verification inside Iran.</strong> Internet at [X]%. Day [N] of blackout. Every Iranian casualty figure remains a claim, not a count.</span>
+    </li>
+
+    <!-- Add/remove items as needed -->
+
+  </ul>
+</div>
+
+
+<!-- ═══════════════════════════════════════════
+  BOTTOM LINE — write this last
+  Synthesize what the day's stress-test revealed.
+  Not a summary of events — a summary of what
+  the evidence structure tells us about confidence.
+════════════════════════════════════════════ -->
+<div class="inference">
+  <div class="inference-label">Bottom Line — Day [DAY_NUMBER]</div>
+  <p>[What does today's claim landscape look like overall? What is the ratio of high-confidence to low-confidence claims in the dominant narrative? What structural pattern is the confidence grading revealing?]</p>
+  <p>[What are the highest-confidence signals today — the things that escaped suppression? What do they tell us?]</p>
+  <p>[Closing sentence that names the persistent uncertainty. What does the wobble look like on Day [N]?]</p>
+</div>
+
+
+<!-- ═══ FOOTER — update day and date ═══ -->
+<div class="foot">
+  <span>Deep Signal Map · Day [DAY_NUMBER] · [DATE] · Two-model relay: DeepSeek + ChatGPT</span>
+  <span>← <a href="deep-signal-map-day[PREV_DAY].html" style="color:var(--dim);text-decoration:none">Day [PREV_DAY]</a> &nbsp;|&nbsp; <a href="index.html" style="color:var(--dim);text-decoration:none">Signal Map</a> &nbsp;|&nbsp; <a href="exoplanet-method.html" style="color:var(--dim);text-decoration:none">Methodology</a></span>
+</div>
+
+</body>
+</html>
